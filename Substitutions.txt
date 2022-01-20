@@ -1,0 +1,6 @@
+﻿#define\s+(?<name>AV_PIX_FMT_\w+)\s+AV_PIX_FMT_NE\((?<be>\w+)\s*,\s*(?<le>\w+)\)
+public static AVPixelFormat ${name} { get; } = BitConverter.IsLittleEndian ? AVPixelFormat.AV_PIX_FMT_${le} : AVPixelFormat.AV_PIX_FMT_${be};
+
+Enumeration:
+(?<def>\s*\w+\s*(=\s*\d+)?\s*,?)\s*///<(?<comment>.*)
+/// <summary>\n///${comment}/// </summary>\n${def}\n

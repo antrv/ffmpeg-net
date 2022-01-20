@@ -1,0 +1,18 @@
+﻿namespace Antrv.FFMpeg.Interop;
+
+partial class LibAvFormat
+{
+    public const int LIBAVFORMAT_VERSION_MAJOR = 59;
+    public const int LIBAVFORMAT_VERSION_MINOR = 16;
+    public const int LIBAVFORMAT_VERSION_MICRO = 100;
+
+    public static int LIBAVFORMAT_VERSION_INT => LibAvUtil.AV_VERSION_INT(LIBAVFORMAT_VERSION_MAJOR,
+        LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
+
+    public static string LIBAVFORMAT_VERSION => LibAvUtil.AV_VERSION(LIBAVFORMAT_VERSION_MAJOR,
+        LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);
+
+    public static int LIBAVFORMAT_BUILD => LIBAVFORMAT_VERSION_INT;
+
+    public static string LIBAVFORMAT_IDENT => "Lavf" + LIBAVFORMAT_VERSION;
+}
