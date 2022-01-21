@@ -1,4 +1,5 @@
-﻿using Antrv.FFMpeg.Interop;
+﻿using System.Collections.Immutable;
+using Antrv.FFMpeg.Interop;
 
 namespace Antrv.FFMpeg.Model.Codecs;
 
@@ -15,6 +16,7 @@ public abstract class Coder
         Name = ptr.Ref.Name.ToString();
         LongName = ptr.Ref.LongName.ToString();
         IsEncoder = isEncoder;
+        Profiles = ptr.Ref.Profiles.CreateProfileList();
     }
 
     public AVCodecID CodecId { get; }
@@ -28,6 +30,8 @@ public abstract class Coder
     public bool IsEncoder { get; }
 
     public override string ToString() => Name + " - " + LongName;
+
+    public ImmutableList<Profile> Profiles { get; }
 
     internal ConstPtr<AVCodec> CodecPtr { get; }
 }

@@ -14,9 +14,9 @@ public abstract class Codec
         MediaType = ptr.Ref.Type;
         Name = ptr.Ref.Name.ToString();
         LongName = ptr.Ref.LongName.ToString();
-
-        MimeTypes = ptr.Ref.MimeTypes.IncrementingSequence(x => !x.Ref.IsNull)
-            .Select(x => x.Ref.ToString()).ToImmutableList();
+        MimeTypes = ptr.Ref.MimeTypes.CreateStringList();
+        Properties = ptr.Ref.Properties;
+        Profiles = ptr.Ref.Profiles.CreateProfileList();
     }
 
     /// <summary>
@@ -29,13 +29,17 @@ public abstract class Codec
         Name = "unknown";
         LongName = "Unknown codec";
         MimeTypes = ImmutableList<string>.Empty;
+        Properties = AVCodecProperties.None;
+        Profiles = ImmutableList<Profile>.Empty;
     }
 
     public AVCodecID CodecId { get; }
     public AVMediaType MediaType { get; }
     public string Name { get; }
     public string LongName { get; }
-    public IReadOnlyList<string> MimeTypes { get; }
+    public ImmutableList<string> MimeTypes { get; }
+    public AVCodecProperties Properties { get; }
+    public ImmutableList<Profile> Profiles { get; }
 
     /// <summary>
     /// The list of decoders for the codec.

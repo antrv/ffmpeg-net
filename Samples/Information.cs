@@ -1,5 +1,7 @@
-﻿using Antrv.FFMpeg.Model;
+﻿using Antrv.FFMpeg.Interop;
+using Antrv.FFMpeg.Model;
 using Antrv.FFMpeg.Model.Codecs;
+using Antrv.FFMpeg.Model.Formats;
 
 namespace Samples;
 
@@ -19,21 +21,39 @@ internal static class Information
         {
             Console.WriteLine($"{codec.CodecId} - {codec.Name} - {codec.LongName}");
 
+            if (codec.Properties != AVCodecProperties.None)
+                Console.WriteLine($" - properties: {codec.Properties}");
+
+            foreach (Profile profile in codec.Profiles)
+                Console.WriteLine($" - profile {profile.Id} - {profile.Name}");
+
             foreach (Decoder decoder in codec.Decoders)
             {
                 Console.WriteLine($" - decoder: {decoder.Name} - {decoder.LongName}");
                 switch (decoder)
                 {
                     case VideoDecoder videoDecoder:
-                        Console.WriteLine("   pixel formats: " + string.Join(", ", videoDecoder.PixelFormats));
-                        Console.WriteLine("   framerates: " + string.Join(", ", videoDecoder.FrameRates));
+                        if (videoDecoder.PixelFormats.Count > 0)
+                            Console.WriteLine("     pixel formats: " + string.Join(", ", videoDecoder.PixelFormats));
+
+                        if (videoDecoder.FrameRates.Count > 0)
+                            Console.WriteLine("     framerates: " + string.Join(", ", videoDecoder.FrameRates));
                         break;
+
                     case AudioDecoder audioDecoder:
-                        Console.WriteLine("   channel layouts: " + string.Join(", ", audioDecoder.ChannelLayouts));
-                        Console.WriteLine("   sample formats: " + string.Join(", ", audioDecoder.SampleFormats));
-                        Console.WriteLine("   samplerates: " + string.Join(", ", audioDecoder.SampleRates));
+                        if (audioDecoder.ChannelLayouts.Count > 0)
+                            Console.WriteLine("     channel layouts: " + string.Join(", ", audioDecoder.ChannelLayouts));
+
+                        if (audioDecoder.SampleFormats.Count > 0)
+                            Console.WriteLine("     sample formats: " + string.Join(", ", audioDecoder.SampleFormats));
+                        
+                        if (audioDecoder.SampleRates.Count > 0)
+                            Console.WriteLine("     samplerates: " + string.Join(", ", audioDecoder.SampleRates));
                         break;
                 }
+
+                foreach (Profile profile in decoder.Profiles)
+                    Console.WriteLine($"     profile {profile.Id} - {profile.Name}");
             }
 
             foreach (Encoder encoder in codec.Encoders)
@@ -42,15 +62,27 @@ internal static class Information
                 switch (encoder)
                 {
                     case VideoEncoder videoEncoder:
-                        Console.WriteLine("   pixel formats: " + string.Join(", ", videoEncoder.PixelFormats));
-                        Console.WriteLine("   framerates: " + string.Join(", ", videoEncoder.FrameRates));
+                        if (videoEncoder.PixelFormats.Count > 0)
+                            Console.WriteLine("     pixel formats: " + string.Join(", ", videoEncoder.PixelFormats));
+
+                        if (videoEncoder.FrameRates.Count > 0)
+                            Console.WriteLine("     framerates: " + string.Join(", ", videoEncoder.FrameRates));
+
                         break;
                     case AudioEncoder audioEncoder:
-                        Console.WriteLine("   channel layouts: " + string.Join(", ", audioEncoder.ChannelLayouts));
-                        Console.WriteLine("   sample formats: " + string.Join(", ", audioEncoder.SampleFormats));
-                        Console.WriteLine("   samplerates: " + string.Join(", ", audioEncoder.SampleRates));
+                        if (audioEncoder.ChannelLayouts.Count > 0)
+                            Console.WriteLine("     channel layouts: " + string.Join(", ", audioEncoder.ChannelLayouts));
+
+                        if (audioEncoder.SampleFormats.Count > 0)
+                            Console.WriteLine("     sample formats: " + string.Join(", ", audioEncoder.SampleFormats));
+
+                        if (audioEncoder.SampleRates.Count > 0)
+                            Console.WriteLine("     samplerates: " + string.Join(", ", audioEncoder.SampleRates));
                         break;
                 }
+
+                foreach (Profile profile in encoder.Profiles)
+                    Console.WriteLine($"     profile {profile.Id} - {profile.Name}");
             }
         }
 
@@ -67,7 +99,22 @@ internal static class Information
     internal static void PrintOutputFormats()
     {
         Console.WriteLine("Output formats:");
-        Global.OutputFormats.ForEach(Console.WriteLine);
+        Global.OutputFormats.ForEach(format =>
+        {
+            Console.WriteLine(format);
+            
+            if (format.DefaultVideoCodec != null)
+                Console.WriteLine($" - default video codec: {format.DefaultVideoCodec.LongName}");
+            
+            if (format.DefaultAudioCodec != null)
+                Console.WriteLine($" - default audio codec: {format.DefaultAudioCodec.LongName}");
+
+            if (format.DefaultSubtitleCodec != null)
+                Console.WriteLine($" - default subtitle codec: {format.DefaultSubtitleCodec.LongName}");
+
+            foreach (CodecSupport codec in format.SupportedCodecs)
+                Console.WriteLine($" - supported codec: {codec.Codec.LongName} - {codec.StandardCompliance}");
+        });
         Console.WriteLine();
     }
 }

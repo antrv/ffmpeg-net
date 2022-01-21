@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Antrv.FFMpeg.Interop;
+using Antrv.FFMpeg.Model.Codecs;
 using Antrv.FFMpeg.Model.Formats;
 
 namespace Antrv.FFMpeg.Model;
@@ -78,4 +79,12 @@ internal static class Utils
             index++;
         }
     }
+
+    internal static ImmutableList<Profile> CreateProfileList(this ConstPtr<AVProfile> ptr) =>
+        ptr.IncrementingSequence(x => x.Ref.Profile != AVProfileId.FF_PROFILE_UNKNOWN)
+            .Select(x => new Profile((int)x.Ref.Profile, x.Ref.Name.ToString())).ToImmutableList();
+
+    internal static ImmutableList<string> CreateStringList(this ConstPtr<Utf8StringPtr> ptr) => ptr
+        .IncrementingSequence(x => !x.Ref.IsNull)
+        .Select(x => x.Ref.ToString()).ToImmutableList();
 }

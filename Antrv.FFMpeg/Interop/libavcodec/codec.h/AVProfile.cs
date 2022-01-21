@@ -2,6 +2,6 @@
 
 public struct AVProfile
 {
-    public int Profile;
+    public AVProfileId Profile;
     public Utf8StringPtr Name;
 }
