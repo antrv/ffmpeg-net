@@ -1,0 +1,18 @@
+﻿namespace Antrv.FFMpeg.Interop;
+
+partial class LibSwScale
+{
+    public static int LIBSWSCALE_VERSION_MAJOR => 6;
+    public static int LIBSWSCALE_VERSION_MINOR => 4;
+    public static int LIBSWSCALE_VERSION_MICRO => 100;
+
+    public static int LIBSWSCALE_VERSION_INT => LibAvUtil.AV_VERSION_INT(LIBSWSCALE_VERSION_MAJOR,
+        LIBSWSCALE_VERSION_MINOR, LIBSWSCALE_VERSION_MICRO);
+
+    public static string LIBSWSCALE_VERSION =>
+        LibAvUtil.AV_VERSION(LIBSWSCALE_VERSION_MAJOR, LIBSWSCALE_VERSION_MINOR, LIBSWSCALE_VERSION_MICRO);
+
+    public static int LIBSWSCALE_BUILD => LIBSWSCALE_VERSION_INT;
+
+    public static string LIBSWSCALE_IDENT => "SwS" + LIBSWSCALE_VERSION;
+}

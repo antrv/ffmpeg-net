@@ -13,6 +13,7 @@
   <ItemGroup>
     <Folder Include="Interop\libavcodec\codec_desc.h\" />
     <Folder Include="Interop\libavcodec\packet.h\" />
+    <Folder Include="Interop\libswscale\swscale.h\" />
   </ItemGroup>
 
 </Project>
