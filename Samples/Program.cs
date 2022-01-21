@@ -1,6 +1,8 @@
-﻿using Samples;
+﻿using static Samples.Information;
 
-Information.PrintChannelLayouts();
-Information.PrintCodecs();
-Information.PrintInputFormats();
-Information.PrintOutputFormats();
+PrintChannelLayouts();
+PrintCodecs();
+PrintInputFormats();
+PrintOutputFormats();
+PrintInputDevices();
+PrintOutputDevices();

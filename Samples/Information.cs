@@ -1,6 +1,8 @@
-﻿using Antrv.FFMpeg.Interop;
+﻿using System.Collections.Immutable;
+using Antrv.FFMpeg.Interop;
 using Antrv.FFMpeg.Model;
 using Antrv.FFMpeg.Model.Codecs;
+using Antrv.FFMpeg.Model.Devices;
 using Antrv.FFMpeg.Model.Formats;
 
 namespace Samples;
@@ -99,22 +101,72 @@ internal static class Information
     internal static void PrintOutputFormats()
     {
         Console.WriteLine("Output formats:");
-        Global.OutputFormats.ForEach(format =>
-        {
-            Console.WriteLine(format);
-            
-            if (format.DefaultVideoCodec != null)
-                Console.WriteLine($" - default video codec: {format.DefaultVideoCodec.LongName}");
-            
-            if (format.DefaultAudioCodec != null)
-                Console.WriteLine($" - default audio codec: {format.DefaultAudioCodec.LongName}");
-
-            if (format.DefaultSubtitleCodec != null)
-                Console.WriteLine($" - default subtitle codec: {format.DefaultSubtitleCodec.LongName}");
-
-            foreach (CodecSupport codec in format.SupportedCodecs)
-                Console.WriteLine($" - supported codec: {codec.Codec.LongName} - {codec.StandardCompliance}");
-        });
+        Global.OutputFormats.ForEach(PrintOutputFormat);
         Console.WriteLine();
+    }
+
+    internal static void PrintInputDevices()
+    {
+        Console.WriteLine("Input audio device types:");
+        Global.InputDeviceTypes.AudioDeviceTypes.ForEach(deviceType =>
+        {
+            Console.WriteLine(deviceType);
+            PrintDeviceInfo(deviceType.Devices);
+        });
+
+        Console.WriteLine();
+
+        Console.WriteLine("Input video device types:");
+        Global.InputDeviceTypes.VideoDeviceTypes.ForEach(deviceType =>
+        {
+            Console.WriteLine(deviceType);
+            PrintDeviceInfo(deviceType.Devices);
+        });
+
+        Console.WriteLine();
+    }
+
+    internal static void PrintOutputDevices()
+    {
+        Console.WriteLine("Output audio device types:");
+        Global.OutputDeviceTypes.AudioDeviceTypes.ForEach(deviceType =>
+        {
+            Console.WriteLine(deviceType);
+            PrintDeviceInfo(deviceType.Devices);
+        });
+
+        Console.WriteLine();
+
+        Console.WriteLine("Output video device types:");
+        Global.OutputDeviceTypes.VideoDeviceTypes.ForEach(deviceType =>
+        {
+            PrintOutputFormat(deviceType);
+            PrintDeviceInfo(deviceType.Devices);
+        });
+
+        Console.WriteLine();
+    }
+
+    private static void PrintOutputFormat(OutputFormat format)
+    {
+        Console.WriteLine(format);
+
+        if (format.DefaultVideoCodec != null)
+            Console.WriteLine($" - default video codec: {format.DefaultVideoCodec.LongName}");
+
+        if (format.DefaultAudioCodec != null)
+            Console.WriteLine($" - default audio codec: {format.DefaultAudioCodec.LongName}");
+
+        if (format.DefaultSubtitleCodec != null)
+            Console.WriteLine($" - default subtitle codec: {format.DefaultSubtitleCodec.LongName}");
+
+        foreach (CodecSupport codec in format.SupportedCodecs)
+            Console.WriteLine($" - supported codec: {codec.Codec.LongName} - {codec.StandardCompliance}");
+    }
+
+    private static void PrintDeviceInfo(ImmutableList<DeviceInfo> list)
+    {
+        foreach (DeviceInfo deviceInfo in list)
+            Console.WriteLine($" - device {deviceInfo.Name} - {deviceInfo.Description} - {string.Join(", ", deviceInfo.MediaTypes)}");
     }
 }

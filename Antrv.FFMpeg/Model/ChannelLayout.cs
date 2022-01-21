@@ -2,7 +2,7 @@
 
 namespace Antrv.FFMpeg.Model;
 
-public class ChannelLayout
+public readonly struct ChannelLayout
 {
     internal ChannelLayout(AVChannelLayout channelLayout, string name)
     {

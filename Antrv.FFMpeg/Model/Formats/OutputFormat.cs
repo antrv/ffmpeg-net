@@ -7,7 +7,7 @@ namespace Antrv.FFMpeg.Model.Formats;
 /// <summary>
 /// The description of an output container format.
 /// </summary>
-public sealed class OutputFormat: ContainerFormat
+public class OutputFormat: ContainerFormat
 {
     internal OutputFormat(ConstPtr<AVOutputFormat> ptr)
         : base(ptr)

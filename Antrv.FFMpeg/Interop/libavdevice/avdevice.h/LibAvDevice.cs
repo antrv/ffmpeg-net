@@ -128,7 +128,7 @@ partial class LibAvDevice
     /// List devices.
     ///
     /// Returns available device names and their parameters.
-    /// These are convinient wrappers for avdevice_list_devices().
+    /// These are convenient wrappers for avdevice_list_devices().
     /// Device context is allocated and deallocated internally.
     ///
     /// Device argument takes precedence over device_name when both are set.
@@ -143,14 +143,14 @@ partial class LibAvDevice
     /// <returns>count of autodetected devices, negative on error.</returns>
     [DllImport(LibraryName)]
     public static extern int avdevice_list_input_sources(ConstPtr<AVInputFormat> device,
-        [MarshalAs(UnmanagedType.LPUTF8Str)] string deviceName, Ptr<AVDictionary> deviceOptions,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string? deviceName, Ptr<AVDictionary> deviceOptions,
         out Ptr<AVDeviceInfoList> deviceList);
 
     /// <summary>
     /// List devices.
     ///
     /// Returns available device names and their parameters.
-    /// These are convinient wrappers for avdevice_list_devices().
+    /// These are convenient wrappers for avdevice_list_devices().
     /// Device context is allocated and deallocated internally.
     ///
     /// Device argument takes precedence over device_name when both are set.
@@ -165,7 +165,7 @@ partial class LibAvDevice
     /// <returns>count of autodetected devices, negative on error.</returns>
     [DllImport(LibraryName)]
     public static extern int avdevice_list_output_sinks(ConstPtr<AVOutputFormat> device,
-        [MarshalAs(UnmanagedType.LPUTF8Str)] string deviceName, Ptr<AVDictionary> deviceOptions,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string? deviceName, Ptr<AVDictionary> deviceOptions,
         out Ptr<AVDeviceInfoList> deviceList);
 
 }
