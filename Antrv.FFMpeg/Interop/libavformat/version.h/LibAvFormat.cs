@@ -2,9 +2,9 @@
 
 partial class LibAvFormat
 {
-    public const int LIBAVFORMAT_VERSION_MAJOR = 59;
-    public const int LIBAVFORMAT_VERSION_MINOR = 16;
-    public const int LIBAVFORMAT_VERSION_MICRO = 100;
+    public static int LIBAVFORMAT_VERSION_MAJOR => 59;
+    public static int LIBAVFORMAT_VERSION_MINOR => 16;
+    public static int LIBAVFORMAT_VERSION_MICRO => 100;
 
     public static int LIBAVFORMAT_VERSION_INT => LibAvUtil.AV_VERSION_INT(LIBAVFORMAT_VERSION_MAJOR,
         LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO);

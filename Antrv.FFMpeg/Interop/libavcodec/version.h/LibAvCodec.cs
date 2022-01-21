@@ -1,0 +1,18 @@
+﻿namespace Antrv.FFMpeg.Interop;
+
+partial class LibAvCodec
+{
+    public static int LIBAVCODEC_VERSION_MAJOR => 59;
+    public static int LIBAVCODEC_VERSION_MINOR => 18;
+    public static int LIBAVCODEC_VERSION_MICRO => 100;
+
+    public static int LIBAVCODEC_VERSION_INT => LibAvUtil.AV_VERSION_INT(LIBAVCODEC_VERSION_MAJOR,
+        LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
+
+    public static string LIBAVCODEC_VERSION => LibAvUtil.AV_VERSION(LIBAVCODEC_VERSION_MAJOR,
+        LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO);
+
+    public static int LIBAVCODEC_BUILD => LIBAVCODEC_VERSION_INT;
+
+    public static string LIBAVCODEC_IDENT => "Lavc" + LIBAVCODEC_VERSION;
+}
