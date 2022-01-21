@@ -20,7 +20,7 @@ public struct AVOption
     /// <summary>
     /// the default value for scalar options
     /// </summary>
-    public Union<long, double, Utf8StringPtr, AVRational> DefaultValue;
+    public AVOptionDefaultValue DefaultValue;
 
     /// <summary>
     /// minimum valid value for the option

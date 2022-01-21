@@ -10,7 +10,7 @@ namespace Antrv.FFMpeg.Interop;
 /// The struct must be allocated with av_film_grain_params_alloc() and
 /// its size is not a part of the public ABI.
 /// </summary>
-public struct AVFilmGrainParams 
+public struct AVFilmGrainParams
 {
     /// <summary>
     /// Specifies the codec for which this structure is valid.
@@ -28,5 +28,5 @@ public struct AVFilmGrainParams
     /// If a codec's film grain structure differs slightly over another
     /// codec's, fields within may change meaning depending on the type.
     /// </summary>
-    public Union<AVFilmGrainAomParams, AVFilmGrainH274Params> Codec;
+    public AVFilmGrainCodecParams Codec;
 }

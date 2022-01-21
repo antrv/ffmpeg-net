@@ -31,11 +31,11 @@ public struct AVCodecDescriptor
     /// May be NULL; if not, a NULL-terminated array of MIME types.
     /// The first item is always non-NULL and is the preferred MIME type.
     /// </summary>
-    public Ptr<Utf8StringPtr> MimeTypes;
+    public ConstPtr<Utf8StringPtr> MimeTypes;
 
     /// <summary>
     /// If non-NULL, an array of profiles recognized for this codec.
     /// Terminated with FF_PROFILE_UNKNOWN.
     /// </summary>
-    public Ptr<AVProfile> Profiles;
+    public ConstPtr<AVProfile> Profiles;
 }

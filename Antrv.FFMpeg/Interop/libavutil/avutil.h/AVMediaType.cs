@@ -22,5 +22,4 @@ public enum AVMediaType
     /// Opaque data information usually sparse
     /// </summary>
     AVMEDIA_TYPE_ATTACHMENT,
-    AVMEDIA_TYPE_NB
 }

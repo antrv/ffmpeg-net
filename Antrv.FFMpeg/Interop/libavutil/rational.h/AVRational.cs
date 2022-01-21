@@ -1,4 +1,6 @@
-﻿namespace Antrv.FFMpeg.Interop;
+﻿using System.Globalization;
+
+namespace Antrv.FFMpeg.Interop;
 
 public struct AVRational: IComparable<AVRational>
 {
@@ -21,4 +23,6 @@ public struct AVRational: IComparable<AVRational>
 
         return (_numerator * (long)other._denominator).CompareTo(other._numerator * (long)_denominator);
     }
+
+    public override string ToString() => string.Format(CultureInfo.InvariantCulture, "{0}/{1}", _numerator, _denominator);
 }
