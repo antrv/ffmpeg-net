@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.IO;
 using Antrv.FFMpeg.Interop;
 using Antrv.FFMpeg.Model;
 using Antrv.FFMpeg.Model.Codecs;
@@ -135,6 +136,14 @@ internal static class Information
         using InputSource source = InputSource.OpenFile(filePath);
 
         Console.WriteLine(filePath);
+
+        if (source.Metadata.Count > 0)
+        {
+            Console.WriteLine("Metadata:");
+            foreach (KeyValuePair<string, string> pair in source.Metadata)
+                Console.WriteLine($" - {pair.Key}: {pair.Value}");
+        }
+
         Console.WriteLine("Input format: " + source.Format.FullName);
         Console.WriteLine("Streams: ");
         foreach (InputStream stream in source.Streams)
@@ -145,9 +154,7 @@ internal static class Information
             {
                 Console.WriteLine("      Metadata:");
                 foreach (KeyValuePair<string, string> pair in stream.Metadata)
-                {
                     Console.WriteLine($"       - {pair.Key}: {pair.Value}");
-                }
             }
 
             switch (stream)
@@ -166,6 +173,17 @@ internal static class Information
                     Console.WriteLine($"    - color range: {videoStream.Parameters.ColorRange}");
                     Console.WriteLine($"    - color space: {videoStream.Parameters.ColorSpace}");
                     Console.WriteLine($"    - color transfer characteristic: {videoStream.Parameters.ColorTransferCharacteristic}");
+                    break;
+                case InputAudioStream audioStream:
+                    Console.WriteLine($"    - sample format: {audioStream.Parameters.SampleFormat}");
+                    Console.WriteLine($"    - samplerate: {audioStream.Parameters.SampleRate}");
+                    Console.WriteLine($"    - bits per sample: {audioStream.Parameters.BitsPerSample}");
+                    Console.WriteLine($"    - channels: {audioStream.Parameters.Channels}");
+                    Console.WriteLine($"    - channel layout: {audioStream.Parameters.ChannelLayout}");
+                    Console.WriteLine($"    - bitrate: {audioStream.Parameters.BitRate}");
+                    Console.WriteLine($"    - profile: {audioStream.Parameters.Profile}");
+                    Console.WriteLine($"    - level: {audioStream.Parameters.Level}");
+                    Console.WriteLine($"    - codec tag: {audioStream.Parameters.CodecTag}");
                     break;
             }
         }

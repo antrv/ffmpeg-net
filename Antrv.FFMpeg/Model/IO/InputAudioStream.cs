@@ -11,6 +11,26 @@ public sealed class InputAudioStream: InputStream<AudioParameters>
 
     private static AudioParameters CreateParameters(Ptr<AVStream> ptr)
     {
-        return new AudioParameters();
+        ref AVCodecParameters parRef = ref ptr.Ref.CodecParameters.Ref;
+
+        return new()
+        {
+            MediaType = AVMediaType.AVMEDIA_TYPE_AUDIO,
+            SampleFormat = (AVSampleFormat)parRef.Format,
+            SampleRate = parRef.SampleRate,
+            CodecTag = parRef.CodecTag,
+            BitRate = parRef.BitRate,
+            ChannelLayout = parRef.ChannelLayout,
+            Channels = parRef.Channels,
+            BitsPerSample = parRef.BitsPerCodedSample,
+            BitsPerRawSample = parRef.BitsPerRawSample,
+            BlockAlign = parRef.BlockAlign,
+            FrameSize = parRef.FrameSize,
+            InitialPadding = parRef.InitialPadding,
+            Level = parRef.Level,
+            Profile = parRef.Profile,
+            SeekPreroll = parRef.SeekPreroll,
+            TrailingPadding = parRef.TrailingPadding,
+        };
     }
 }

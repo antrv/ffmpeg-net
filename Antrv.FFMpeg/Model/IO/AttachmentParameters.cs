@@ -1,6 +1,5 @@
 ﻿namespace Antrv.FFMpeg.Model.IO;
 
-public sealed class AttachmentParameters
+public sealed class AttachmentParameters: CodecParameters
 {
-
 }

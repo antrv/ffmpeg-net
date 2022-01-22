@@ -27,16 +27,20 @@ internal static class Utils
 
     internal static ImmutableDictionary<string, string> ToImmutableDictionary(this Ptr<AVDictionary> ptr)
     {
-        ImmutableDictionary<string, string>.Builder builder = ImmutableDictionary.CreateBuilder<string, string>();
-        for (Ptr<AVDictionaryEntry> entry = LibAvUtil.av_dict_get(ptr, string.Empty, default,
-                 AVDictionaryFlags.AV_DICT_IGNORE_SUFFIX);
-             entry;
-             entry = LibAvUtil.av_dict_get(ptr, string.Empty, entry, AVDictionaryFlags.AV_DICT_IGNORE_SUFFIX))
+        if (ptr)
         {
-            builder.Add(entry.Ref.Key.ToString(), entry.Ref.Value.ToString());
+            ImmutableDictionary<string, string>.Builder builder = ImmutableDictionary.CreateBuilder<string, string>();
+            for (Ptr<AVDictionaryEntry> entry = LibAvUtil.av_dict_get(ptr, string.Empty, default,
+                     AVDictionaryFlags.AV_DICT_IGNORE_SUFFIX);
+                 entry;
+                 entry = LibAvUtil.av_dict_get(ptr, string.Empty, entry, AVDictionaryFlags.AV_DICT_IGNORE_SUFFIX))
+            {
+                builder.Add(entry.Ref.Key.ToString(), entry.Ref.Value.ToString());
+            }
+            return builder.ToImmutable();
         }
 
-        return builder.ToImmutable();
+        return ImmutableDictionary<string, string>.Empty;
     }
 
     internal static ImmutableList<string> Split(this Utf8StringPtr ptr, char separator)

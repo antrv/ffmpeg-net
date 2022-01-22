@@ -13,8 +13,9 @@ public sealed class InputVideoStream: InputStream<VideoParameters>
     {
         ref AVCodecParameters parRef = ref ptr.Ref.CodecParameters.Ref;
 
-        VideoParameters parameters = new()
+        return new()
         {
+            MediaType = AVMediaType.AVMEDIA_TYPE_VIDEO,
             Width = parRef.Width,
             Height = parRef.Height,
             BitRate = parRef.BitRate,
@@ -30,7 +31,5 @@ public sealed class InputVideoStream: InputStream<VideoParameters>
             ColorTransferCharacteristic = parRef.ColorTrc,
             VideoDelay = parRef.VideoDelay
         };
-
-        return parameters;
     }
 }

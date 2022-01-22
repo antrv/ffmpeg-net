@@ -9,5 +9,17 @@ public sealed class InputSubtitleStream: InputStream<SubtitleParameters>
     {
     }
 
-    private static SubtitleParameters CreateParameters(Ptr<AVStream> ptr) => new();
+    private static SubtitleParameters CreateParameters(Ptr<AVStream> ptr)
+    {
+        ref AVCodecParameters parRef = ref ptr.Ref.CodecParameters.Ref;
+
+        return new()
+        {
+            MediaType = AVMediaType.AVMEDIA_TYPE_SUBTITLE,
+            BitRate = parRef.BitRate,
+            CodecTag = parRef.CodecTag,
+            Profile = parRef.Profile,
+            Level = parRef.Level
+        };
+    }
 }

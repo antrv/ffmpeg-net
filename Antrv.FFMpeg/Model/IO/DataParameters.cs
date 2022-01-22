@@ -1,6 +1,5 @@
 ﻿namespace Antrv.FFMpeg.Model.IO;
 
-public sealed class DataParameters
+public sealed class DataParameters: CodecParameters
 {
-
 }

@@ -15,6 +15,7 @@ public abstract class InputSource: IDisposable
     private readonly ImmutableList<InputSubtitleStream> _subtitleStreams;
     private readonly ImmutableList<InputAttachmentStream> _attachmentStreams;
     private readonly ImmutableList<InputDataStream> _dataStreams;
+    private readonly ImmutableDictionary<string, string> _metadata;
 
     private protected InputSource(InputSourceData data)
     {
@@ -38,6 +39,8 @@ public abstract class InputSource: IDisposable
 
         _dataStreams = streams.Where(s => s.MediaType == AVMediaType.AVMEDIA_TYPE_DATA)
             .Cast<InputDataStream>().ToImmutableList();
+
+        _metadata = data.Context.Ptr.Ref.Metadata.ToImmutableDictionary();
     }
 
     public InputFormat Format => _inputFormat;
@@ -48,7 +51,7 @@ public abstract class InputSource: IDisposable
     public ImmutableList<InputAttachmentStream> AttachmentStreams => _attachmentStreams;
     public ImmutableList<InputDataStream> DataStreams => _dataStreams;
 
-    // TODO: metadata
+    public ImmutableDictionary<string, string> Metadata => _metadata;
 
     public void Dispose() => _context.Dispose();
 

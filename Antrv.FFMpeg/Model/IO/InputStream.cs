@@ -72,6 +72,7 @@ public abstract class InputStream
 }
 
 public abstract class InputStream<TParameters>: InputStream
+    where TParameters: CodecParameters
 {
     internal InputStream(Ptr<AVStream> ptr, TParameters parameters)
         : base(ptr)
