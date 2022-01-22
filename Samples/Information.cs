@@ -107,20 +107,11 @@ internal static class Information
 
     internal static void PrintInputDevices()
     {
-        Console.WriteLine("Input audio device types:");
-        Global.InputDeviceTypes.AudioDeviceTypes.ForEach(deviceType =>
+        Console.WriteLine("Input devices:");
+        Global.InputDevices.ForEach(deviceType =>
         {
             Console.WriteLine(deviceType);
-            PrintDeviceInfo(deviceType.Devices);
-        });
-
-        Console.WriteLine();
-
-        Console.WriteLine("Input video device types:");
-        Global.InputDeviceTypes.VideoDeviceTypes.ForEach(deviceType =>
-        {
-            Console.WriteLine(deviceType);
-            PrintDeviceInfo(deviceType.Devices);
+            PrintDeviceInfo(deviceType.Sources);
         });
 
         Console.WriteLine();
@@ -128,20 +119,11 @@ internal static class Information
 
     internal static void PrintOutputDevices()
     {
-        Console.WriteLine("Output audio device types:");
-        Global.OutputDeviceTypes.AudioDeviceTypes.ForEach(deviceType =>
-        {
-            Console.WriteLine(deviceType);
-            PrintDeviceInfo(deviceType.Devices);
-        });
-
-        Console.WriteLine();
-
-        Console.WriteLine("Output video device types:");
-        Global.OutputDeviceTypes.VideoDeviceTypes.ForEach(deviceType =>
+        Console.WriteLine("Output devices:");
+        Global.OutputDevices.ForEach(deviceType =>
         {
             PrintOutputFormat(deviceType);
-            PrintDeviceInfo(deviceType.Devices);
+            PrintDeviceInfo(deviceType.Sinks);
         });
 
         Console.WriteLine();
@@ -164,9 +146,9 @@ internal static class Information
             Console.WriteLine($" - supported codec: {codec.Codec.LongName} - {codec.StandardCompliance}");
     }
 
-    private static void PrintDeviceInfo(ImmutableList<DeviceInfo> list)
+    private static void PrintDeviceInfo(ImmutableList<DevicePointInfo> list)
     {
-        foreach (DeviceInfo deviceInfo in list)
-            Console.WriteLine($" - device {deviceInfo.Name} - {deviceInfo.Description} - {string.Join(", ", deviceInfo.MediaTypes)}");
+        foreach (DevicePointInfo deviceInfo in list)
+            Console.WriteLine($" - {deviceInfo.Name} - {deviceInfo.Description} - {string.Join(", ", deviceInfo.MediaTypes)}");
     }
 }

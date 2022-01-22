@@ -12,10 +12,10 @@ public static class Global
 {
     private static ImmutableList<ChannelLayout>? _channelLayouts;
     private static CodecList? _codecs;
-    private static ImmutableList<InputFormat>? _inputFormats;
-    private static ImmutableList<OutputFormat>? _outputFormats;
-    private static InputDeviceTypeList? _inputDeviceTypes;
-    private static OutputDeviceTypeList? _outputDeviceTypes;
+    private static InputFormatList? _inputFormats;
+    private static OutputFormatList? _outputFormats;
+    private static InputDeviceList? _inputDevices;
+    private static OutputDeviceList? _outputDevices;
 
     /// <summary>
     /// The standard audio channel layouts
@@ -31,22 +31,20 @@ public static class Global
     /// <summary>
     /// Input format list.
     /// </summary>
-    public static ImmutableList<InputFormat> InputFormats =>
-        _inputFormats ??= Utils.EnumerateInputFormats().ToImmutableList();
+    public static InputFormatList InputFormats => _inputFormats ??= new InputFormatList();
 
     /// <summary>
     /// Output format list.
     /// </summary>
-    public static ImmutableList<OutputFormat> OutputFormats =>
-        _outputFormats ??= Utils.EnumerateOutputFormats().ToImmutableList();
+    public static OutputFormatList OutputFormats => _outputFormats ??= new OutputFormatList();
 
     /// <summary>
     /// The list of input devices.
     /// </summary>
-    public static InputDeviceTypeList InputDeviceTypes => _inputDeviceTypes ??= new InputDeviceTypeList();
+    public static InputDeviceList InputDevices => _inputDevices ??= new InputDeviceList();
 
     /// <summary>
     /// The list of input devices.
     /// </summary>
-    public static OutputDeviceTypeList OutputDeviceTypes => _outputDeviceTypes ??= new OutputDeviceTypeList();
+    public static OutputDeviceList OutputDevices => _outputDevices ??= new OutputDeviceList();
 }

@@ -3,9 +3,9 @@ using Antrv.FFMpeg.Interop;
 
 namespace Antrv.FFMpeg.Model.Devices;
 
-public readonly struct DeviceInfo
+public readonly struct DevicePointInfo
 {
-    internal DeviceInfo(string name, string description, ImmutableList<AVMediaType> mediaTypes)
+    internal DevicePointInfo(string name, string description, ImmutableList<AVMediaType> mediaTypes)
     {
         Name = name;
         Description = description;

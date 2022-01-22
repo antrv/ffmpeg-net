@@ -81,17 +81,17 @@ internal static class Utils
         }
     }
 
-    internal static IEnumerable<AudioInputDeviceType> EnumerateAudioInputDevices() =>
-        EnumerateDevices<AVInputFormat>(LibAvDevice.av_input_audio_device_next).Select(x => new AudioInputDeviceType(x));
+    internal static IEnumerable<InputDevice> EnumerateInputDevices() =>
+        EnumerateDevices<AVInputFormat>(LibAvDevice.av_input_audio_device_next).
+            Concat(EnumerateDevices<AVInputFormat>(LibAvDevice.av_input_video_device_next)).
+            Distinct().
+            Select(x => new InputDevice(x));
 
-    internal static IEnumerable<VideoInputDeviceType> EnumerateVideoInputDevices() =>
-        EnumerateDevices<AVInputFormat>(LibAvDevice.av_input_video_device_next).Select(x => new VideoInputDeviceType(x));
-
-    internal static IEnumerable<AudioOutputDeviceType> EnumerateAudioOutputDevices() =>
-        EnumerateDevices<AVOutputFormat>(LibAvDevice.av_output_audio_device_next).Select(x => new AudioOutputDeviceType(x));
-
-    internal static IEnumerable<VideoOutputDeviceType> EnumerateVideoOutputDevices() =>
-        EnumerateDevices<AVOutputFormat>(LibAvDevice.av_output_video_device_next).Select(x => new VideoOutputDeviceType(x));
+    internal static IEnumerable<OutputDevice> EnumerateOutputDevices() =>
+        EnumerateDevices<AVOutputFormat>(LibAvDevice.av_output_audio_device_next).
+            Concat(EnumerateDevices<AVOutputFormat>(LibAvDevice.av_output_video_device_next)).
+            Distinct().
+            Select(x => new OutputDevice(x));
 
     internal static ImmutableList<Profile> CreateProfileList(this ConstPtr<AVProfile> ptr) =>
         ptr.IncrementingSequence(x => x.Ref.Profile != AVProfileId.FF_PROFILE_UNKNOWN)
@@ -101,10 +101,10 @@ internal static class Utils
         .IncrementingSequence(x => !x.Ref.IsNull)
         .Select(x => x.Ref.ToString()).ToImmutableList();
 
-    internal static (ImmutableList<DeviceInfo>, int) GetDeviceList(ConstPtr<AVDeviceInfoList> ptr)
+    internal static (ImmutableList<DevicePointInfo>, int) GetDeviceList(ConstPtr<AVDeviceInfoList> ptr)
     {
         int defaultDeviceIndex = -1;
-        ImmutableList<DeviceInfo>.Builder builder = ImmutableList.CreateBuilder<DeviceInfo>();
+        ImmutableList<DevicePointInfo>.Builder builder = ImmutableList.CreateBuilder<DevicePointInfo>();
 
         if (ptr)
         {
@@ -128,7 +128,7 @@ internal static class Utils
                         mediaTypes = mediaBuilder.ToImmutable();
                     }
 
-                    builder.Add(new DeviceInfo(devicePtr.Ref.DeviceName.ToString(),
+                    builder.Add(new DevicePointInfo(devicePtr.Ref.DeviceName.ToString(),
                         devicePtr.Ref.DeviceDescription.ToString(), mediaTypes));
                 }
             }

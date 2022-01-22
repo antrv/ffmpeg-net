@@ -4,23 +4,28 @@ using Antrv.FFMpeg.Model.Formats;
 
 namespace Antrv.FFMpeg.Model.Devices;
 
-public abstract class OutputDeviceType: OutputFormat
+public sealed class OutputDevice: OutputFormat
 {
-    internal OutputDeviceType(ConstPtr<AVOutputFormat> ptr)
+    internal OutputDevice(ConstPtr<AVOutputFormat> ptr)
         : base(ptr)
+    {
+        (Sinks, DefaultDeviceIndex) = GetSinks(ptr);
+    }
+
+    public int DefaultDeviceIndex { get; }
+
+    public ImmutableList<DevicePointInfo> Sinks { get; }
+
+    private static (ImmutableList<DevicePointInfo>, int) GetSinks(ConstPtr<AVOutputFormat> ptr)
     {
         LibAvDevice.avdevice_list_output_sinks(ptr, null, default, out Ptr<AVDeviceInfoList> deviceList);
         try
         {
-            (Devices, DefaultDeviceIndex) = Utils.GetDeviceList(deviceList);
+            return Utils.GetDeviceList(deviceList);
         }
         finally
         {
             LibAvDevice.avdevice_free_list_devices(ref deviceList);
         }
     }
-
-    public int DefaultDeviceIndex { get; }
-
-    public ImmutableList<DeviceInfo> Devices { get; }
 }
