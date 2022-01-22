@@ -12,7 +12,7 @@ public struct Array8<T>
     private T _value6;
     private T _value7;
 
-    public int Count => 8;
-    public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref _value0, Count);
+    public int Size => 8;
+    public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref _value0, Size);
     public ref T this[int index] => ref Ptr.FromRef(ref _value0)[index];
 }

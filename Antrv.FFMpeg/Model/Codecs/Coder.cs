@@ -13,8 +13,8 @@ public abstract class Coder
         CodecPtr = ptr;
         CodecId = ptr.Ref.Id;
         MediaType = ptr.Ref.Type;
-        Name = ptr.Ref.Name.ToString();
-        LongName = ptr.Ref.LongName.ToString();
+        ShortName = ptr.Ref.Name.ToString();
+        Name = ptr.Ref.LongName.ToString();
         IsEncoder = isEncoder;
         Profiles = ptr.Ref.Profiles.CreateProfileList();
     }
@@ -23,13 +23,13 @@ public abstract class Coder
 
     public AVMediaType MediaType { get; }
 
-    public string Name { get; }
+    public string ShortName { get; }
 
-    public string LongName { get; }
+    public string Name { get; }
 
     public bool IsEncoder { get; }
 
-    public override string ToString() => Name + " - " + LongName;
+    public override string ToString() => ShortName + " - " + Name;
 
     public ImmutableList<Profile> Profiles { get; }
 

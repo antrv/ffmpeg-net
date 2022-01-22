@@ -10,7 +10,7 @@ public struct Array6<T>
     private T _value4;
     private T _value5;
 
-    public int Count => 6;
-    public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref _value0, Count);
+    public int Size => 6;
+    public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref _value0, Size);
     public ref T this[int index] => ref Ptr.FromRef(ref _value0)[index];
 }

@@ -6,7 +6,7 @@ public struct Array10<T>
     private Array8<T> _value0;
     private Array2<T> _value1;
 
-    public int Count => 10;
-    public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref _value0[0], Count);
+    public int Size => 10;
+    public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref _value0[0], Size);
     public ref T this[int index] => ref _value0[index];
 }

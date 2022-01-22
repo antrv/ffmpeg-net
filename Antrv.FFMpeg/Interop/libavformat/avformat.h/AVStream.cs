@@ -8,10 +8,9 @@
 /// </summary>
 public struct AVStream
 {
-    /// <summary>
-    /// A class for @ref avoptions. Set on stream creation.
-    /// </summary>
-    public ConstPtr<AVClass> Class;
+    // A class for @ref avoptions. Set on stream creation.
+    // This field will be added in libavformat-60.
+    //public ConstPtr<AVClass> Class;
 
     /// <summary>
     /// stream index in AVFormatContext
@@ -162,13 +161,4 @@ public struct AVStream
     /// - muxing: set by libavformat
     /// </summary>
     public int PtsWrapBits;
-
-    //****************************************************************
-    // All fields below this line are not part of the public API. They
-    // may not be used outside of libavformat and can be changed and
-    // removed at will.
-    // Internal note: be aware that physically removing these fields
-    // will break ABI. Replace removed fields with dummy fields, and
-    // add new fields to AVStreamInternal.
-    //****************************************************************
 }

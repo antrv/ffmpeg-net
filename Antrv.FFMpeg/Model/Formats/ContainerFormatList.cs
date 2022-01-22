@@ -14,10 +14,12 @@ public abstract class ContainerFormatList<T>: IReadOnlyList<T>
         _items = items.ToImmutableList();
         _dictionary =
             (from item in _items
-             from shortName in item.ShortNames
-             select (ShortName: shortName, Item: item))
-            .DistinctBy(x => x.ShortName, StringComparer.InvariantCultureIgnoreCase)
-            .ToImmutableDictionary(x => x.ShortName, x => x.Item);
+             from id in item.Ids
+             select (Id: id, Item: item))
+            .DistinctBy(x => x.Id, StringComparer.InvariantCultureIgnoreCase)
+            .ToImmutableDictionary(x => x.Id, x => x.Item);
+
+        // TODO: `matroska` format id appears twice: one for matroska video, another for matroska audio
     }
 
     public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();

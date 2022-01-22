@@ -382,7 +382,7 @@ partial class LibAvFormat
     /// <remarks>This function isn't guaranteed to open all the codecs,
     /// so options being non-empty at return is a perfectly normal behavior.</remarks>
     [DllImport(LibraryName)]
-    public static extern int avformat_find_stream_info(Ptr<AVFormatContext> ic, ref Ptr<AVDictionary> options);
+    public static extern int avformat_find_stream_info(Ptr<AVFormatContext> ic, Ptr<Ptr<AVDictionary>> options);
 
     /// <summary>
     /// Find the programs which belong to a given stream.

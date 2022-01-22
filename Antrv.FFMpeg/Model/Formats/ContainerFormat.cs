@@ -13,7 +13,7 @@ public abstract class ContainerFormat
         string shortNames = ptr.Ref.Name.ToString();
         Name = ptr.Ref.LongName.ToString();
         FullName = shortNames + " - " + Name;
-        ShortNames = ptr.Ref.Name.Split(',');
+        Ids = ptr.Ref.Name.Split(',');
         MimeTypes = ptr.Ref.MimeTypes.Split(',');
         Extensions = ptr.Ref.Extensions.Split(',');
         Flags = ptr.Ref.Flags;
@@ -24,13 +24,13 @@ public abstract class ContainerFormat
         string shortNames = ptr.Ref.Name.ToString();
         Name = ptr.Ref.LongName.ToString();
         FullName = shortNames + " - " + Name;
-        ShortNames = ptr.Ref.Name.Split(',');
+        Ids = ptr.Ref.Name.Split(',');
         MimeTypes = ImmutableList.Create(ptr.Ref.MimeType.ToString());
         Extensions = ptr.Ref.Extensions.Split(',');
         Flags = ptr.Ref.Flags;
     }
 
-    public IReadOnlyList<string> ShortNames { get; }
+    public IReadOnlyList<string> Ids { get; }
 
     public string Name { get; }
 

@@ -8,7 +8,7 @@ public struct Array4<T>
     private T _value2;
     private T _value3;
 
-    public int Count => 4;
-    public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref _value0, Count);
+    public int Size => 4;
+    public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref _value0, Size);
     public ref T this[int index] => ref Ptr.FromRef(ref _value0)[index];
 }

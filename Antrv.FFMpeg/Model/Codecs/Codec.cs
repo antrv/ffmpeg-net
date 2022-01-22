@@ -10,10 +10,10 @@ public abstract class Codec
 {
     private protected Codec(ConstPtr<AVCodecDescriptor> ptr)
     {
-        CodecId = ptr.Ref.Id;
+        Id = ptr.Ref.Id;
         MediaType = ptr.Ref.Type;
-        Name = ptr.Ref.Name.ToString();
-        LongName = ptr.Ref.LongName.ToString();
+        ShortName = ptr.Ref.Name.ToString();
+        Name = ptr.Ref.LongName.ToString();
         MimeTypes = ptr.Ref.MimeTypes.CreateStringList();
         Properties = ptr.Ref.Properties;
         Profiles = ptr.Ref.Profiles.CreateProfileList();
@@ -24,19 +24,19 @@ public abstract class Codec
     /// </summary>
     private protected Codec()
     {
-        CodecId = AVCodecID.AV_CODEC_ID_NONE;
+        Id = AVCodecID.AV_CODEC_ID_NONE;
         MediaType = AVMediaType.AVMEDIA_TYPE_UNKNOWN;
-        Name = "unknown";
-        LongName = "Unknown codec";
+        ShortName = "unknown";
+        Name = "Unknown codec";
         MimeTypes = ImmutableList<string>.Empty;
         Properties = AVCodecProperties.None;
         Profiles = ImmutableList<Profile>.Empty;
     }
 
-    public AVCodecID CodecId { get; }
+    public AVCodecID Id { get; }
     public AVMediaType MediaType { get; }
+    public string ShortName { get; }
     public string Name { get; }
-    public string LongName { get; }
     public ImmutableList<string> MimeTypes { get; }
     public AVCodecProperties Properties { get; }
     public ImmutableList<Profile> Profiles { get; }
@@ -51,5 +51,5 @@ public abstract class Codec
     /// </summary>
     public abstract IReadOnlyList<Encoder> Encoders { get; }
 
-    public override string ToString() => $"{MediaType} - {Name} - {LongName}";
+    public override string ToString() => $"{MediaType} - {ShortName} - {Name}";
 }

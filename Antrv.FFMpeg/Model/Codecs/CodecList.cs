@@ -14,7 +14,7 @@ public sealed class CodecList: IReadOnlyList<Codec>
     internal CodecList()
     {
         (Codecs, VideoCodecs, AudioCodecs, SubtitleCodecs, AttachmentCodecs, DataCodecs) = BuildCodecLists();
-        _dictionary = Codecs.ToImmutableDictionary(c => c.CodecId);
+        _dictionary = Codecs.ToImmutableDictionary(c => c.Id);
         UnknownCodec = new UnknownCodec();
     }
 

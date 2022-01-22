@@ -45,7 +45,7 @@ public class OutputFormat: ContainerFormat
                  compliance >= AVStandardCompliance.Experimental;
                  --compliance)
             {
-                if (LibAvFormat.avformat_query_codec(ptr, c.CodecId, compliance) == 1)
+                if (LibAvFormat.avformat_query_codec(ptr, c.Id, compliance) == 1)
                 {
                     return new CodecSupport(c, compliance);
                 }

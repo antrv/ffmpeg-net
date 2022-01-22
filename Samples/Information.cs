@@ -4,6 +4,7 @@ using Antrv.FFMpeg.Model;
 using Antrv.FFMpeg.Model.Codecs;
 using Antrv.FFMpeg.Model.Devices;
 using Antrv.FFMpeg.Model.Formats;
+using Antrv.FFMpeg.Model.IO;
 
 namespace Samples;
 
@@ -12,7 +13,7 @@ internal static class Information
     internal static void PrintChannelLayouts()
     {
         Console.WriteLine("Audio channel standard layouts:");
-        Global.ChannelLayouts.ForEach(x => Console.WriteLine(x.Name));
+        Global.ChannelLayouts.ForEach(x => Console.WriteLine($"{x.Name}: {x.ChannelCount} channels, {x.Layout}"));
         Console.WriteLine();
     }
 
@@ -21,7 +22,7 @@ internal static class Information
         Console.WriteLine("Codecs:");
         foreach (Codec codec in Global.Codecs)
         {
-            Console.WriteLine($"{codec.CodecId} - {codec.Name} - {codec.LongName}");
+            Console.WriteLine($"{codec.Id} - {codec.ShortName} - {codec.Name}");
 
             if (codec.Properties != AVCodecProperties.None)
                 Console.WriteLine($" - properties: {codec.Properties}");
@@ -31,7 +32,7 @@ internal static class Information
 
             foreach (Decoder decoder in codec.Decoders)
             {
-                Console.WriteLine($" - decoder: {decoder.Name} - {decoder.LongName}");
+                Console.WriteLine($" - decoder: {decoder.ShortName} - {decoder.Name}");
                 switch (decoder)
                 {
                     case VideoDecoder videoDecoder:
@@ -60,7 +61,7 @@ internal static class Information
 
             foreach (Encoder encoder in codec.Encoders)
             {
-                Console.WriteLine($" - encoder: {encoder.Name} - {encoder.LongName}");
+                Console.WriteLine($" - encoder: {encoder.ShortName} - {encoder.Name}");
                 switch (encoder)
                 {
                     case VideoEncoder videoEncoder:
@@ -129,21 +130,34 @@ internal static class Information
         Console.WriteLine();
     }
 
+    internal static void PrintMediaFileInfo(string filePath)
+    {
+        using InputSource source = InputSource.OpenFile(filePath);
+
+        Console.WriteLine(filePath);
+        Console.WriteLine("Input format: " + source.Format.FullName);
+        Console.WriteLine("Streams: ");
+        foreach (InputStream stream in source.Streams)
+        {
+            Console.WriteLine($" #{stream.Index} - {stream.MediaType} - {stream.CodecId} - {stream.TimeBase}");
+        }
+    }
+
     private static void PrintOutputFormat(OutputFormat format)
     {
         Console.WriteLine(format);
 
         if (format.DefaultVideoCodec != null)
-            Console.WriteLine($" - default video codec: {format.DefaultVideoCodec.LongName}");
+            Console.WriteLine($" - default video codec: {format.DefaultVideoCodec.Name}");
 
         if (format.DefaultAudioCodec != null)
-            Console.WriteLine($" - default audio codec: {format.DefaultAudioCodec.LongName}");
+            Console.WriteLine($" - default audio codec: {format.DefaultAudioCodec.Name}");
 
         if (format.DefaultSubtitleCodec != null)
-            Console.WriteLine($" - default subtitle codec: {format.DefaultSubtitleCodec.LongName}");
+            Console.WriteLine($" - default subtitle codec: {format.DefaultSubtitleCodec.Name}");
 
         foreach (CodecSupport codec in format.SupportedCodecs)
-            Console.WriteLine($" - supported codec: {codec.Codec.LongName} - {codec.StandardCompliance}");
+            Console.WriteLine($" - supported codec: {codec.Codec.Name} - {codec.StandardCompliance}");
     }
 
     private static void PrintDeviceInfo(ImmutableList<DevicePointInfo> list)

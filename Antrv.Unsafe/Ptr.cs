@@ -74,5 +74,6 @@ public readonly struct Ptr<T>: IEquatable<Ptr<T>>
 
 public static class Ptr
 {
-    public static Ptr<T> FromRef<T>(ref T value) where T : unmanaged => new(ref value);
+    public static Ptr<T> FromRef<T>(ref T value)
+        where T: unmanaged => new(ref value);
 }
