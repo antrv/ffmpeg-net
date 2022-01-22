@@ -140,6 +140,34 @@ internal static class Information
         foreach (InputStream stream in source.Streams)
         {
             Console.WriteLine($" #{stream.Index} - {stream.MediaType} - {stream.CodecId} - {stream.TimeBase}");
+
+            if (stream.Metadata.Count > 0)
+            {
+                Console.WriteLine("      Metadata:");
+                foreach (KeyValuePair<string, string> pair in stream.Metadata)
+                {
+                    Console.WriteLine($"       - {pair.Key}: {pair.Value}");
+                }
+            }
+
+            switch (stream)
+            {
+                case InputVideoStream videoStream:
+                    Console.WriteLine($"    - dimensions: {videoStream.Parameters.Width}x{videoStream.Parameters.Height}");
+                    Console.WriteLine($"    - pixel format: {videoStream.Parameters.PixelFormat}");
+                    Console.WriteLine($"    - bitrate: {videoStream.Parameters.BitRate}");
+                    Console.WriteLine($"    - profile: {videoStream.Parameters.Profile}");
+                    Console.WriteLine($"    - level: {videoStream.Parameters.Level}");
+                    Console.WriteLine($"    - field order: {videoStream.Parameters.FieldOrder}");
+                    Console.WriteLine($"    - codec tag: {videoStream.Parameters.CodecTag}");
+                    Console.WriteLine($"    - delay: {videoStream.Parameters.VideoDelay}");
+                    Console.WriteLine($"    - chroma location: {videoStream.Parameters.ChromaLocation}");
+                    Console.WriteLine($"    - color primaries: {videoStream.Parameters.ColorPrimaries}");
+                    Console.WriteLine($"    - color range: {videoStream.Parameters.ColorRange}");
+                    Console.WriteLine($"    - color space: {videoStream.Parameters.ColorSpace}");
+                    Console.WriteLine($"    - color transfer characteristic: {videoStream.Parameters.ColorTransferCharacteristic}");
+                    break;
+            }
         }
     }
 

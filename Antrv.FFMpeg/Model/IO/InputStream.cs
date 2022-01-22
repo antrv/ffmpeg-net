@@ -73,8 +73,11 @@ public abstract class InputStream
 
 public abstract class InputStream<TParameters>: InputStream
 {
-    internal InputStream(Ptr<AVStream> ptr)
+    internal InputStream(Ptr<AVStream> ptr, TParameters parameters)
         : base(ptr)
     {
+        Parameters = parameters;
     }
+
+    public TParameters Parameters { get; }
 }
