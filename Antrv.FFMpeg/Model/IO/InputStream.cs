@@ -16,12 +16,9 @@ public abstract class InputStream
         TimeBase = ptr.Ref.TimeBase;
 
         StartTime = ptr.Ref.StartTime;
-        StartTime2 = TimeSpan.FromTicks(TimeSpan.TicksPerSecond * TimeBase.Numerator /
-            TimeBase.Denominator * StartTime);
-
-        Duration = ptr.Ref.Duration;
-        Duration2 = TimeSpan.FromTicks(TimeSpan.TicksPerSecond * TimeBase.Numerator /
-            TimeBase.Denominator * Duration);
+        StartTime2 = TimeUtils.ToTimeSpan(StartTime, TimeBase);
+        Duration = ptr.Ref.Duration == long.MinValue ? null : ptr.Ref.Duration;
+        Duration2 = Duration == null ? null : TimeUtils.ToTimeSpan(Duration.Value, TimeBase);
 
         Metadata = ptr.Ref.Metadata.ToImmutableDictionary();
     }
@@ -45,12 +42,12 @@ public abstract class InputStream
     /// <summary>
     /// Duration of the stream in TimeBase units.
     /// </summary>
-    public long Duration { get; }
+    public long? Duration { get; }
 
     /// <summary>
     /// Duration of the stream. May be inaccurate.
     /// </summary>
-    public TimeSpan Duration2 { get; }
+    public TimeSpan? Duration2 { get; }
 
     public ImmutableDictionary<string, string> Metadata { get; }
 

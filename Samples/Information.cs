@@ -136,12 +136,17 @@ internal static class Information
         using InputSource source = InputSource.OpenFile(filePath);
 
         Console.WriteLine(filePath);
+        PrintMetadata(source.Metadata, string.Empty);
 
-        if (source.Metadata.Count > 0)
+        if (source.Chapters.Count > 0)
         {
-            Console.WriteLine("Metadata:");
-            foreach (KeyValuePair<string, string> pair in source.Metadata)
-                Console.WriteLine($" - {pair.Key}: {pair.Value}");
+            Console.WriteLine("Chapters: ");
+            for (var index = 0; index < source.Chapters.Count; index++)
+            {
+                Chapter chapter = source.Chapters[index];
+                Console.WriteLine($" #{index + 1} - {chapter.StartTime2} - {chapter.EndTime2}");
+                PrintMetadata(chapter.Metadata, "      ");
+            }
         }
 
         Console.WriteLine("Input format: " + source.Format.FullName);
@@ -149,13 +154,7 @@ internal static class Information
         foreach (InputStream stream in source.Streams)
         {
             Console.WriteLine($" #{stream.Index} - {stream.MediaType} - {stream.CodecId} - {stream.TimeBase}");
-
-            if (stream.Metadata.Count > 0)
-            {
-                Console.WriteLine("      Metadata:");
-                foreach (KeyValuePair<string, string> pair in stream.Metadata)
-                    Console.WriteLine($"       - {pair.Key}: {pair.Value}");
-            }
+            PrintMetadata(stream.Metadata, "      ");
 
             switch (stream)
             {
@@ -186,6 +185,16 @@ internal static class Information
                     Console.WriteLine($"    - codec tag: {audioStream.Parameters.CodecTag}");
                     break;
             }
+        }
+    }
+
+    private static void PrintMetadata(ImmutableDictionary<string, string> metadata, string prefix)
+    {
+        if (metadata.Count > 0)
+        {
+            Console.WriteLine($"{prefix}Metadata:");
+            foreach (KeyValuePair<string, string> pair in metadata)
+                Console.WriteLine($"{prefix} - {pair.Key}: {pair.Value}");
         }
     }
 

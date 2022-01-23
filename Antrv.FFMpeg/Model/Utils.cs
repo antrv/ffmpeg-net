@@ -25,6 +25,12 @@ internal static class Utils
         }
     }
 
+    internal static IEnumerable<ConstPtr<AVChapter>> EnumerableChapters(this Ptr<Ptr<AVChapter>> ptr, int count)
+    {
+        for (int i = 0; i < count; i++)
+            yield return ptr[i];
+    }
+
     internal static ImmutableDictionary<string, string> ToImmutableDictionary(this Ptr<AVDictionary> ptr)
     {
         if (ptr)
