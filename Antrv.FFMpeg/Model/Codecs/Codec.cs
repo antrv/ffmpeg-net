@@ -25,7 +25,7 @@ public abstract class Codec
     private protected Codec()
     {
         Id = AVCodecID.AV_CODEC_ID_NONE;
-        MediaType = AVMediaType.AVMEDIA_TYPE_UNKNOWN;
+        MediaType = AVMediaType.Unknown;
         ShortName = "unknown";
         Name = "Unknown codec";
         MimeTypes = ImmutableList<string>.Empty;

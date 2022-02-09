@@ -6,10 +6,9 @@ internal abstract class ResourceGuard<T, TGuard>: IDisposable
 {
     public Ptr<T> Ptr;
 
-    private protected ResourceGuard(Ptr<T> ptr)
-    {
-        Ptr = ptr;
-    }
+    private protected ResourceGuard() => Ptr = default;
+
+    private protected ResourceGuard(Ptr<T> ptr) => Ptr = ptr;
 
     ~ResourceGuard()
     {

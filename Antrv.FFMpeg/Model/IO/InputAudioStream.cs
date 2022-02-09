@@ -15,7 +15,7 @@ public sealed class InputAudioStream: InputStream<AudioParameters>
 
         return new()
         {
-            MediaType = AVMediaType.AVMEDIA_TYPE_AUDIO,
+            MediaType = AVMediaType.Audio,
             SampleFormat = (AVSampleFormat)parRef.Format,
             SampleRate = parRef.SampleRate,
             CodecTag = parRef.CodecTag,

@@ -2,10 +2,11 @@
 using Antrv.FFMpeg.Model.Formats;
 using System.Collections.Immutable;
 using Antrv.FFMpeg.Model.Guards;
+using Antrv.FFMpeg.Model.Devices;
 
 namespace Antrv.FFMpeg.Model.IO;
 
-public abstract class InputSource: IDisposable
+public sealed class InputSource: IDisposable
 {
     private readonly FormatContextGuard _context;
     private readonly InputFormat _inputFormat;
@@ -18,27 +19,27 @@ public abstract class InputSource: IDisposable
     private readonly ImmutableDictionary<string, string> _metadata;
     private readonly ImmutableList<Chapter> _chapters;
 
-    private protected InputSource(InputSourceData data)
+    internal InputSource(InputSourceData data)
     {
         _context = data.Context;
         _inputFormat = data.Format;
-        _streams = data.Streams;
 
-        ImmutableList<InputStream> streams = data.Streams;
+        ImmutableList<InputStream> streams = CreateStreams(ref data.Context.Ptr.Ref);
+        _streams = streams;
 
-        _videoStreams = streams.Where(s => s.MediaType == AVMediaType.AVMEDIA_TYPE_VIDEO)
+        _videoStreams = streams.Where(s => s.MediaType == AVMediaType.Video)
             .Cast<InputVideoStream>().ToImmutableList();
 
-        _audioStreams = streams.Where(s => s.MediaType == AVMediaType.AVMEDIA_TYPE_AUDIO)
+        _audioStreams = streams.Where(s => s.MediaType == AVMediaType.Audio)
             .Cast<InputAudioStream>().ToImmutableList();
 
-        _subtitleStreams = streams.Where(s => s.MediaType == AVMediaType.AVMEDIA_TYPE_SUBTITLE)
+        _subtitleStreams = streams.Where(s => s.MediaType == AVMediaType.Subtitle)
             .Cast<InputSubtitleStream>().ToImmutableList();
 
-        _attachmentStreams = streams.Where(s => s.MediaType == AVMediaType.AVMEDIA_TYPE_ATTACHMENT)
+        _attachmentStreams = streams.Where(s => s.MediaType == AVMediaType.Attachment)
             .Cast<InputAttachmentStream>().ToImmutableList();
 
-        _dataStreams = streams.Where(s => s.MediaType == AVMediaType.AVMEDIA_TYPE_DATA)
+        _dataStreams = streams.Where(s => s.MediaType == AVMediaType.Data)
             .Cast<InputDataStream>().ToImmutableList();
 
         ref var contextRef = ref data.Context.Ptr.Ref;
@@ -49,8 +50,6 @@ public abstract class InputSource: IDisposable
             StartTime = x.Ref.Start,
             EndTime = x.Ref.End,
             TimeBase = x.Ref.TimeBase,
-            StartTime2 = TimeUtils.ToTimeSpan(x.Ref.Start, x.Ref.TimeBase),
-            EndTime2 = TimeUtils.ToTimeSpan(x.Ref.End, x.Ref.TimeBase),
             Metadata = x.Ref.Metadata.ToImmutableDictionary()
         }).ToImmutableList();
     }
@@ -68,6 +67,58 @@ public abstract class InputSource: IDisposable
 
     public void Dispose() => _context.Dispose();
 
+    public static InputSource OpenDevice(InputDevice device, string source,
+        ImmutableDictionary<string, string>? options) =>
+        new(OpenContextFromDevice(device, source, options));
+
     public static InputSource OpenFile(string filePath, InputFormat? forceFormat = null) =>
-        new FileSource(filePath, forceFormat);
+        new(OpenContextFromFile(filePath, forceFormat));
+
+    private static InputSourceData OpenContextFromFile(string fileName,
+        InputFormat? format)
+    {
+        using FormatContextGuard context = new();
+        using DictionaryGuard dictionary = new();
+        dictionary.Set("scan_all_pmts", "1");
+
+        ConstPtr<AVInputFormat> inputFormat = format?.Ptr ?? default;
+        LibAvFormat.avformat_open_input(ref context.Ptr, fileName, inputFormat, ref dictionary.Ptr)
+            .ThrowOnError("Failed to open media file");
+
+        LibAvFormat.avformat_find_stream_info(context.Ptr, default).ThrowOnError("Failed to open media file");
+
+        InputFormat? resultFormat = format ?? Global.InputFormats.GetByPtr(context.Ptr.Ref.InputFormat);
+        if (resultFormat is null)
+            throw new InvalidOperationException("Cannot find input format");
+
+        return new(context.MovePtr(), resultFormat);
+    }
+
+    private static InputSourceData OpenContextFromDevice(InputDevice device, string source,
+        ImmutableDictionary<string, string>? options)
+    {
+        using FormatContextGuard context = new();
+        using DictionaryGuard dictionary = new();
+
+        if (options is not null)
+        {
+            foreach ((string key, string value) in options)
+                dictionary.Set(key, value);
+        }
+
+        ConstPtr<AVInputFormat> inputFormat = device.Ptr;
+        LibAvFormat.avformat_open_input(ref context.Ptr, source, inputFormat, ref dictionary.Ptr)
+            .ThrowOnError("Failed to open device");
+
+        return new(context.MovePtr(), device);
+    }
+
+    private static ImmutableList<InputStream> CreateStreams(ref AVFormatContext contextRef)
+    {
+        ImmutableList<InputStream>.Builder streams = ImmutableList.CreateBuilder<InputStream>();
+        for (int i = 0, count = contextRef.StreamCount; i < count; i++)
+            streams.Add(InputStream.Create(contextRef.Streams[i]));
+
+        return streams.ToImmutable();
+    }
 }

@@ -85,35 +85,35 @@ public sealed class CodecList: IReadOnlyList<Codec>
             bool isEncoder = LibAvCodec.av_codec_is_encoder(ptr) != 0;
             switch (ptr.Ref.Type)
             {
-                case AVMediaType.AVMEDIA_TYPE_VIDEO:
+                case AVMediaType.Video:
                     if (isEncoder)
                         videoEncoders.Add(new VideoEncoder(ptr));
                     else
                         videoDecoders.Add(new VideoDecoder(ptr));
                     break;
 
-                case AVMediaType.AVMEDIA_TYPE_AUDIO:
+                case AVMediaType.Audio:
                     if (isEncoder)
                         audioEncoders.Add(new AudioEncoder(ptr));
                     else
                         audioDecoders.Add(new AudioDecoder(ptr));
                     break;
 
-                case AVMediaType.AVMEDIA_TYPE_SUBTITLE:
+                case AVMediaType.Subtitle:
                     if (isEncoder)
                         subtitleEncoders.Add(new SubtitleEncoder(ptr));
                     else
                         subtitleDecoders.Add(new SubtitleDecoder(ptr));
                     break;
 
-                case AVMediaType.AVMEDIA_TYPE_ATTACHMENT:
+                case AVMediaType.Attachment:
                     if (isEncoder)
                         attachmentEncoders.Add(new AttachmentEncoder(ptr));
                     else
                         attachmentDecoders.Add(new AttachmentDecoder(ptr));
                     break;
 
-                case AVMediaType.AVMEDIA_TYPE_DATA:
+                case AVMediaType.Data:
                     if (isEncoder)
                         dataEncoders.Add(new DataEncoder(ptr));
                     else
@@ -132,31 +132,31 @@ public sealed class CodecList: IReadOnlyList<Codec>
         {
             switch (ptr.Ref.Type)
             {
-                case AVMediaType.AVMEDIA_TYPE_VIDEO:
+                case AVMediaType.Video:
                     codecs.Add(new VideoCodec(ptr,
                         videoDecoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList(),
                         videoEncoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList()));
                     break;
 
-                case AVMediaType.AVMEDIA_TYPE_AUDIO:
+                case AVMediaType.Audio:
                     codecs.Add(new AudioCodec(ptr,
                         audioDecoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList(),
                         audioEncoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList()));
                     break;
 
-                case AVMediaType.AVMEDIA_TYPE_SUBTITLE:
+                case AVMediaType.Subtitle:
                     codecs.Add(new SubtitleCodec(ptr,
                         subtitleDecoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList(),
                         subtitleEncoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList()));
                     break;
 
-                case AVMediaType.AVMEDIA_TYPE_ATTACHMENT:
+                case AVMediaType.Attachment:
                     codecs.Add(new AttachmentCodec(ptr,
                         attachmentDecoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList(),
                         attachmentEncoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList()));
                     break;
 
-                case AVMediaType.AVMEDIA_TYPE_DATA:
+                case AVMediaType.Data:
                     codecs.Add(new DataCodec(ptr, dataDecoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList(),
                         dataEncoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList()));
                     break;

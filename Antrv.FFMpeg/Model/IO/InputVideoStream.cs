@@ -15,7 +15,7 @@ public sealed class InputVideoStream: InputStream<VideoParameters>
 
         return new()
         {
-            MediaType = AVMediaType.AVMEDIA_TYPE_VIDEO,
+            MediaType = AVMediaType.Video,
             Width = parRef.Width,
             Height = parRef.Height,
             BitRate = parRef.BitRate,

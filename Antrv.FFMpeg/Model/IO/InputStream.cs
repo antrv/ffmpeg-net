@@ -1,9 +1,11 @@
 ﻿using System.Collections.Immutable;
 using Antrv.FFMpeg.Interop;
+using Antrv.FFMpeg.Model.Codecs;
+using Antrv.FFMpeg.Model.Streams;
 
 namespace Antrv.FFMpeg.Model.IO;
 
-public abstract class InputStream
+public abstract class InputStream: IEncodedStream
 {
     private protected InputStream(Ptr<AVStream> ptr)
     {
@@ -11,23 +13,22 @@ public abstract class InputStream
 
         Index = ptr.Ref.Index;
         MediaType = codecParams.CodecType;
-        CodecId = codecParams.CodecId;
+        Codec = Global.Codecs[codecParams.CodecId];
         Disposition = ptr.Ref.Disposition;
         TimeBase = ptr.Ref.TimeBase;
 
         StartTime = ptr.Ref.StartTime;
-        StartTime2 = TimeUtils.ToTimeSpan(StartTime, TimeBase);
         Duration = ptr.Ref.Duration == long.MinValue ? null : ptr.Ref.Duration;
-        Duration2 = Duration == null ? null : TimeUtils.ToTimeSpan(Duration.Value, TimeBase);
 
         Metadata = ptr.Ref.Metadata.ToImmutableDictionary();
     }
 
     public int Index { get; }
     public AVMediaType MediaType { get; }
-    public AVCodecID CodecId { get; }
+    public Codec Codec { get; }
     public AVDisposition Disposition { get; }
     public AVRational TimeBase { get; }
+    public abstract StreamParameters Parameters { get; }
 
     /// <summary>
     /// The time of the stream start in TimeBase units.
@@ -37,7 +38,7 @@ public abstract class InputStream
     /// <summary>
     /// The time of the stream start. May be inaccurate.
     /// </summary>
-    public TimeSpan StartTime2 { get; }
+    public TimeSpan StartTime2 => TimeUtils.ToTimeSpan(StartTime, TimeBase);
 
     /// <summary>
     /// Duration of the stream in TimeBase units.
@@ -47,7 +48,7 @@ public abstract class InputStream
     /// <summary>
     /// Duration of the stream. May be inaccurate.
     /// </summary>
-    public TimeSpan? Duration2 { get; }
+    public TimeSpan? Duration2 => Duration is null ? null : TimeUtils.ToTimeSpan(Duration.Value, TimeBase);
 
     public ImmutableDictionary<string, string> Metadata { get; }
 
@@ -56,11 +57,11 @@ public abstract class InputStream
         AVMediaType mediaType = ptr.Ref.CodecParameters.Ref.CodecType;
         InputStream stream = mediaType switch
         {
-            AVMediaType.AVMEDIA_TYPE_VIDEO => new InputVideoStream(ptr),
-            AVMediaType.AVMEDIA_TYPE_AUDIO => new InputAudioStream(ptr),
-            AVMediaType.AVMEDIA_TYPE_SUBTITLE => new InputSubtitleStream(ptr),
-            AVMediaType.AVMEDIA_TYPE_DATA => new InputDataStream(ptr),
-            AVMediaType.AVMEDIA_TYPE_ATTACHMENT => new InputAttachmentStream(ptr),
+            AVMediaType.Video => new InputVideoStream(ptr),
+            AVMediaType.Audio => new InputAudioStream(ptr),
+            AVMediaType.Subtitle => new InputSubtitleStream(ptr),
+            AVMediaType.Data => new InputDataStream(ptr),
+            AVMediaType.Attachment => new InputAttachmentStream(ptr),
             _ => new InputUnknownStream(ptr)
         };
 
@@ -69,13 +70,13 @@ public abstract class InputStream
 }
 
 public abstract class InputStream<TParameters>: InputStream
-    where TParameters: CodecParameters
+    where TParameters: StreamParameters
 {
-    internal InputStream(Ptr<AVStream> ptr, TParameters parameters)
+    private protected InputStream(Ptr<AVStream> ptr, TParameters parameters)
         : base(ptr)
     {
         Parameters = parameters;
     }
 
-    public TParameters Parameters { get; }
+    public override TParameters Parameters { get; }
 }

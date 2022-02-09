@@ -2,7 +2,7 @@
 
 namespace Antrv.FFMpeg.Model.IO;
 
-public sealed class AudioParameters: CodecParameters
+public sealed class AudioParameters: StreamParameters
 {
     public AVSampleFormat SampleFormat { get; init; }
     public int SampleRate { get; init; }

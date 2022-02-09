@@ -15,7 +15,7 @@ public sealed class InputSubtitleStream: InputStream<SubtitleParameters>
 
         return new()
         {
-            MediaType = AVMediaType.AVMEDIA_TYPE_SUBTITLE,
+            MediaType = AVMediaType.Subtitle,
             BitRate = parRef.BitRate,
             CodecTag = parRef.CodecTag,
             Profile = parRef.Profile,

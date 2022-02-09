@@ -2,7 +2,7 @@
 
 namespace Antrv.FFMpeg.Model.IO;
 
-public sealed class VideoParameters: CodecParameters
+public sealed class VideoParameters: StreamParameters
 {
     public int Width { get; init; }
     public int Height { get; init; }

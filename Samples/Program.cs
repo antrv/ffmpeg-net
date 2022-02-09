@@ -1,4 +1,5 @@
-﻿using static Samples.Information;
+﻿using Samples;
+using static Samples.Information;
 
 if (args.Length > 0 && !string.IsNullOrWhiteSpace(args[0]))
 {
@@ -6,10 +7,12 @@ if (args.Length > 0 && !string.IsNullOrWhiteSpace(args[0]))
 }
 else
 {
-    PrintChannelLayouts();
-    PrintCodecs();
-    PrintInputFormats();
-    PrintOutputFormats();
-    PrintInputDevices();
-    PrintOutputDevices();
+    //PrintChannelLayouts();
+    //PrintCodecs();
+    //PrintInputFormats();
+    //PrintOutputFormats();
+    //PrintInputDevices();
+    //PrintOutputDevices();
+
+    Devices.ShowCameraAndMicrophoneInfo();
 }

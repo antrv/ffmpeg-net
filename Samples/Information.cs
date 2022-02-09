@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.IO;
 using Antrv.FFMpeg.Interop;
 using Antrv.FFMpeg.Model;
 using Antrv.FFMpeg.Model.Codecs;
@@ -131,11 +130,8 @@ internal static class Information
         Console.WriteLine();
     }
 
-    internal static void PrintMediaFileInfo(string filePath)
+    internal static void PrintInputSourceInfo(InputSource source)
     {
-        using InputSource source = InputSource.OpenFile(filePath);
-
-        Console.WriteLine(filePath);
         PrintMetadata(source.Metadata, string.Empty);
 
         if (source.Chapters.Count > 0)
@@ -144,7 +140,7 @@ internal static class Information
             for (var index = 0; index < source.Chapters.Count; index++)
             {
                 Chapter chapter = source.Chapters[index];
-                Console.WriteLine($" #{index + 1} - {chapter.StartTime2} - {chapter.EndTime2}");
+                Console.WriteLine($" #{index + 1} ({chapter.Id}) - {chapter.StartTime2} - {chapter.EndTime2}");
                 PrintMetadata(chapter.Metadata, "      ");
             }
         }
@@ -153,7 +149,7 @@ internal static class Information
         Console.WriteLine("Streams: ");
         foreach (InputStream stream in source.Streams)
         {
-            Console.WriteLine($" #{stream.Index} - {stream.MediaType} - {stream.CodecId} - {stream.TimeBase}");
+            Console.WriteLine($" #{stream.Index} - {stream.MediaType} - {stream.Codec.Id} - {stream.TimeBase}");
             PrintMetadata(stream.Metadata, "      ");
 
             switch (stream)
@@ -186,6 +182,14 @@ internal static class Information
                     break;
             }
         }
+    }
+
+    internal static void PrintMediaFileInfo(string filePath)
+    {
+        using InputSource source = InputSource.OpenFile(filePath);
+        Console.WriteLine(filePath);
+
+        PrintInputSourceInfo(source);
     }
 
     private static void PrintMetadata(ImmutableDictionary<string, string> metadata, string prefix)

@@ -271,10 +271,6 @@ public enum AVCodecID
     AV_CODEC_ID_GEM,
 
     // various PCM "codecs"
-    /// <summary>
-    /// A dummy id pointing at the start of audio codecs
-    /// </summary>
-    AV_CODEC_ID_FIRST_AUDIO = 0x10000,
     AV_CODEC_ID_PCM_S16LE = 0x10000,
     AV_CODEC_ID_PCM_S16BE,
     AV_CODEC_ID_PCM_U16LE,
@@ -494,10 +490,6 @@ public enum AVCodecID
     AV_CODEC_ID_MSNSIREN,
 
     // Subtitle codecs
-    /// <summary>
-    /// A dummy ID pointing at the start of subtitle codecs.
-    /// </summary>
-    AV_CODEC_ID_FIRST_SUBTITLE = 0x17000,
     AV_CODEC_ID_DVD_SUBTITLE = 0x17000,
     AV_CODEC_ID_DVB_SUBTITLE,
 
@@ -530,10 +522,6 @@ public enum AVCodecID
     AV_CODEC_ID_ARIB_CAPTION,
 
     // other specific kind of codecs (generally used for attachments)
-    /// <summary>
-    /// A dummy ID pointing at the start of various fake codecs.
-    /// </summary>
-    AV_CODEC_ID_FIRST_UNKNOWN = 0x18000,
     AV_CODEC_ID_TTF = 0x18000,
 
     /// <summary>
@@ -575,4 +563,10 @@ public enum AVCodecID
     /// Passthrough codec, AVFrames wrapped in AVPacket
     /// </summary>
     AV_CODEC_ID_WRAPPED_AVFRAME = 0x21001,
+
+    // Dummy ids
+    AV_CODEC_ID_FIRST_VIDEO = AV_CODEC_ID_MPEG1VIDEO,
+    AV_CODEC_ID_FIRST_AUDIO = AV_CODEC_ID_PCM_S16LE,
+    AV_CODEC_ID_FIRST_SUBTITLE = AV_CODEC_ID_DVD_SUBTITLE,
+    AV_CODEC_ID_FIRST_UNKNOWN = AV_CODEC_ID_TTF,
 }

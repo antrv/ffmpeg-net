@@ -4,12 +4,10 @@ namespace Antrv.FFMpeg.Model.Guards;
 
 internal sealed class DictionaryGuard: ResourceGuard<AVDictionary, DictionaryGuard>
 {
-    private DictionaryGuard(Ptr<AVDictionary> ptr)
-        : base(ptr)
+    public DictionaryGuard()
+        : base(default)
     {
     }
-
-    public static DictionaryGuard New() => new(default);
 
     public void Set(string key, string value) => LibAvUtil.av_dict_set(ref Ptr, key, value, AVDictionaryFlags.None);
 

@@ -1,5 +1,5 @@
 ﻿namespace Antrv.FFMpeg.Model.IO;
 
-public sealed class SubtitleParameters: CodecParameters
+public sealed class SubtitleParameters: StreamParameters
 {
 }
