@@ -4,6 +4,13 @@ namespace Antrv.FFMpeg.Model;
 
 internal static class TimeUtils
 {
+    internal static long? ToNullableTs(long ts) => ts == LibAvUtil.AV_NOPTS_VALUE ? null : ts;
+
+    internal static long? ToNullableDuration(long ts) => ts == 0 ? null : ts;
+
+    internal static TimeSpan? ToTimeSpan(long? time, AVRational timeBase) =>
+        time is null ? null : ToTimeSpan(time.Value, timeBase);
+
     internal static TimeSpan ToTimeSpan(long time, AVRational timeBase)
     {
         if (time == 0)

@@ -1,15 +1,25 @@
 ﻿using System.Collections.Immutable;
 using Antrv.FFMpeg.Interop;
 using Antrv.FFMpeg.Model.Codecs;
-using Antrv.FFMpeg.Model.Streams;
+using Antrv.FFMpeg.Model.Processing;
 
 namespace Antrv.FFMpeg.Model.IO;
 
-public abstract class InputStream: IEncodedStream
+public sealed class InputStream: IEncodedStream
 {
-    private protected InputStream(Ptr<AVStream> ptr)
+    private readonly ObserverManager<Packet> _manager;
+    private readonly CodecParameters _codecParameters;
+
+    internal InputStream(InputSource source, Ptr<AVStream> ptr)
     {
+        _manager = new(OnSubscribed, OnUnsubscribed);
+
+        Ptr = ptr;
+        Source = source;
+
         ref AVCodecParameters codecParams = ref ptr.Ref.CodecParameters.Ref;
+        Parameters = StreamParametersFactory.CreateStreamParameters(codecParams);
+        _codecParameters = new(ptr.Ref.CodecParameters);
 
         Index = ptr.Ref.Index;
         MediaType = codecParams.CodecType;
@@ -21,14 +31,23 @@ public abstract class InputStream: IEncodedStream
         Duration = ptr.Ref.Duration == long.MinValue ? null : ptr.Ref.Duration;
 
         Metadata = ptr.Ref.Metadata.ToImmutableDictionary();
+
+        // Initially all data from the stream is discarded.
+        // This flag is changed when observers are attached.
+        ptr.Ref.Discard = AVDiscard.AVDISCARD_ALL;
     }
+
+    public InputSource Source { get; }
+    internal Ptr<AVStream> Ptr { get; }
 
     public int Index { get; }
     public AVMediaType MediaType { get; }
     public Codec Codec { get; }
+    CodecParameters IEncodedStream.CodecParameters => _codecParameters;
+
     public AVDisposition Disposition { get; }
     public AVRational TimeBase { get; }
-    public abstract StreamParameters Parameters { get; }
+    public StreamParameters Parameters { get; }
 
     /// <summary>
     /// The time of the stream start in TimeBase units.
@@ -52,31 +71,22 @@ public abstract class InputStream: IEncodedStream
 
     public ImmutableDictionary<string, string> Metadata { get; }
 
-    internal static InputStream Create(Ptr<AVStream> ptr)
-    {
-        AVMediaType mediaType = ptr.Ref.CodecParameters.Ref.CodecType;
-        InputStream stream = mediaType switch
-        {
-            AVMediaType.Video => new InputVideoStream(ptr),
-            AVMediaType.Audio => new InputAudioStream(ptr),
-            AVMediaType.Subtitle => new InputSubtitleStream(ptr),
-            AVMediaType.Data => new InputDataStream(ptr),
-            AVMediaType.Attachment => new InputAttachmentStream(ptr),
-            _ => new InputUnknownStream(ptr)
-        };
+    public IDisposable Subscribe(IObserver<Packet> observer) => _manager.Subscribe(observer);
 
-        return stream;
-    }
-}
-
-public abstract class InputStream<TParameters>: InputStream
-    where TParameters: StreamParameters
-{
-    private protected InputStream(Ptr<AVStream> ptr, TParameters parameters)
-        : base(ptr)
+    internal void Completed() => _manager.Completed();
+    internal void Error(Exception exception) => _manager.Error(exception);
+    internal void Next(Packet packet) => _manager.Next(packet);
+    
+    private void OnSubscribed(IObserver<Packet> observer)
     {
-        Parameters = parameters;
+        // If the stream has subscribers, the packets from the stream must not be discarded.
+        Ptr.Ref.Discard = AVDiscard.AVDISCARD_DEFAULT;
     }
 
-    public override TParameters Parameters { get; }
+    private void OnUnsubscribed(IObserver<Packet> observer)
+    {
+        // If the stream has no subscribers, the packets from the stream are not needed.
+        if (_manager.HasNoSubscribers)
+            Ptr.Ref.Discard = AVDiscard.AVDISCARD_ALL;
+    }
 }

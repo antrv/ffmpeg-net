@@ -1,5 +1,12 @@
 ﻿namespace Antrv.FFMpeg.Interop;
 
+using DrawHorizBandDelegate = ActionPtr<Ptr<AVCodecContext>, Ptr<AVFrame>, Array8<int>, int, int, int>;
+using GetFormatDelegate = FuncPtr<Ptr<AVCodecContext>, ConstPtr<AVPixelFormat>, AVPixelFormat>;
+using GetBuffer2Delegate = FuncPtr<Ptr<AVCodecContext>, Ptr<AVFrame>, int, AVGetBufferFlags>;
+using ExecuteDelegate = FuncPtr<Ptr<AVCodecContext>, FuncPtr<Ptr<AVCodecContext>, IntPtr, int>, IntPtr, Ptr<int>, int, int>;
+using Execute2Delegate = FuncPtr<Ptr<AVCodecContext>, FuncPtr<Ptr<AVCodecContext>, IntPtr, int, int, int>, IntPtr, Ptr<int>, int, int>;
+using GetEncodeBufferDelegate = FuncPtr<Ptr<AVCodecContext>, Ptr<AVPacket>, AVGetBufferFlags, int>;
+
 /// <summary>
 /// main external API structure.
 /// New fields can be added to the end with minor version bumps.
@@ -224,7 +231,13 @@ public struct AVCodecContext
     /// - encoding: unused
     /// - decoding: Set by user.
     /// </summary>
-    public ActionPtr<Ptr<AVCodecContext>, Ptr<AVFrame>, Array8<int>, int, int, int> DrawHorizBand; // s, src, offset, y, type, height
+    public DrawHorizBandDelegate DrawHorizBand // s, src, offset, y, type, height
+    {
+        get => (DrawHorizBandDelegate)DrawHorizBandPtr;
+        set => DrawHorizBandPtr = (IntPtr)value;
+    }
+
+    public IntPtr DrawHorizBandPtr;
 
     /// <summary>
     /// Callback to negotiate the pixel format. Decoding only, may be set by the
@@ -251,7 +264,13 @@ public struct AVCodecContext
     ///          than one of the formats in fmt or AV_PIX_FMT_NONE.
     /// @return the chosen format or AV_PIX_FMT_NONE
     /// </summary>
-    public FuncPtr<Ptr<AVCodecContext>, ConstPtr<AVPixelFormat>, AVPixelFormat> GetFormat;
+    public GetFormatDelegate GetFormat
+    {
+        get => (GetFormatDelegate)GetFormatPtr;
+        set => GetFormatPtr = (IntPtr)value;
+    }
+
+    public IntPtr GetFormatPtr;
 
     /// <summary>
     /// maximum number of B-frames between non-B-frames
@@ -727,7 +746,13 @@ public struct AVCodecContext
     /// - encoding: unused
     /// - decoding: Set by libavcodec, user can override.
     /// </summary>
-    public FuncPtr<Ptr<AVCodecContext>, Ptr<AVFrame>, int, AVGetBufferFlags> GetBuffer2;
+    public GetBuffer2Delegate GetBuffer2
+    {
+        get => (GetBuffer2Delegate)GetBuffer2Ptr;
+        set => GetBuffer2Ptr = (IntPtr)value;
+    }
+
+    public IntPtr GetBuffer2Ptr;
 
     /// <summary>
     /// amount of qscale change between easy &amp; hard scenes (0.0-1.0)
@@ -998,7 +1023,13 @@ public struct AVCodecContext
     /// 
     /// count is the number of things to execute
     /// </summary>
-    public FuncPtr<Ptr<AVCodecContext>, FuncPtr<Ptr<AVCodecContext>, IntPtr, int>, IntPtr, Ptr<int>, int, int> Execute; // c, func, arg2, ret, count, size
+    public ExecuteDelegate Execute // c, func, arg2, ret, count, size
+    {
+        get => (ExecuteDelegate)ExecutePtr;
+        set => ExecutePtr = (IntPtr)value;
+    }
+
+    public IntPtr ExecutePtr;
 
     /// <summary>
     /// The codec may call this to execute several independent things.
@@ -1019,8 +1050,13 @@ public struct AVCodecContext
     /// return always 0 currently, but code should handle a future improvement where when any call to func
     /// returns &lt; 0 no further calls to func may be done and &lt; 0 is returned.
     /// </summary>
-    public FuncPtr<Ptr<AVCodecContext>, FuncPtr<Ptr<AVCodecContext>, IntPtr, int, int, int>, IntPtr, Ptr<int>, int, int>
-        Execute2; // c, func, arg2, ret, count, size
+    public Execute2Delegate Execute2 // c, func, arg2, ret, count, size
+    {
+        get => (Execute2Delegate)Execute2Ptr;
+        set => Execute2Ptr = (IntPtr)value;
+    }
+
+    public IntPtr Execute2Ptr;
 
     /// <summary>
     /// noise vs. sse weight for the nsse comparison function
@@ -1389,5 +1425,11 @@ public struct AVCodecContext
     /// - encoding: Set by libavcodec, user can override.
     /// - decoding: unused
     /// </summary>
-    public FuncPtr<Ptr<AVCodecContext>, Ptr<AVPacket>, AVGetBufferFlags, int> GetEncodeBuffer;
+    public GetEncodeBufferDelegate GetEncodeBuffer
+    {
+        get => (GetEncodeBufferDelegate)GetEncodeBufferPtr;
+        set => GetEncodeBufferPtr = (IntPtr)value;
+    }
+
+    public IntPtr GetEncodeBufferPtr;
 }

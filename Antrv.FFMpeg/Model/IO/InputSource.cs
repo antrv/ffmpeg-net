@@ -3,44 +3,27 @@ using Antrv.FFMpeg.Model.Formats;
 using System.Collections.Immutable;
 using Antrv.FFMpeg.Model.Guards;
 using Antrv.FFMpeg.Model.Devices;
+using Antrv.FFMpeg.Model.Processing;
 
 namespace Antrv.FFMpeg.Model.IO;
 
-public sealed class InputSource: IDisposable
+public sealed class InputSource: IInputSource, IDisposable
 {
     private readonly FormatContextGuard _context;
+    private readonly PacketGuard _packet;
     private readonly InputFormat _inputFormat;
     private readonly ImmutableList<InputStream> _streams;
-    private readonly ImmutableList<InputVideoStream> _videoStreams;
-    private readonly ImmutableList<InputAudioStream> _audioStreams;
-    private readonly ImmutableList<InputSubtitleStream> _subtitleStreams;
-    private readonly ImmutableList<InputAttachmentStream> _attachmentStreams;
-    private readonly ImmutableList<InputDataStream> _dataStreams;
     private readonly ImmutableDictionary<string, string> _metadata;
     private readonly ImmutableList<Chapter> _chapters;
 
     internal InputSource(InputSourceData data)
     {
+        _packet = new();
         _context = data.Context;
         _inputFormat = data.Format;
 
-        ImmutableList<InputStream> streams = CreateStreams(ref data.Context.Ptr.Ref);
+        ImmutableList<InputStream> streams = CreateStreams(this, ref data.Context.Ptr.Ref);
         _streams = streams;
-
-        _videoStreams = streams.Where(s => s.MediaType == AVMediaType.Video)
-            .Cast<InputVideoStream>().ToImmutableList();
-
-        _audioStreams = streams.Where(s => s.MediaType == AVMediaType.Audio)
-            .Cast<InputAudioStream>().ToImmutableList();
-
-        _subtitleStreams = streams.Where(s => s.MediaType == AVMediaType.Subtitle)
-            .Cast<InputSubtitleStream>().ToImmutableList();
-
-        _attachmentStreams = streams.Where(s => s.MediaType == AVMediaType.Attachment)
-            .Cast<InputAttachmentStream>().ToImmutableList();
-
-        _dataStreams = streams.Where(s => s.MediaType == AVMediaType.Data)
-            .Cast<InputDataStream>().ToImmutableList();
 
         ref var contextRef = ref data.Context.Ptr.Ref;
         _metadata = contextRef.Metadata.ToImmutableDictionary();
@@ -54,16 +37,57 @@ public sealed class InputSource: IDisposable
         }).ToImmutableList();
     }
 
+    /// <summary>
+    /// Input format of the source.
+    /// </summary>
     public InputFormat Format => _inputFormat;
-    public ImmutableList<InputStream> Streams => _streams;
-    public ImmutableList<InputVideoStream> VideoStreams => _videoStreams;
-    public ImmutableList<InputAudioStream> AudioStreams => _audioStreams;
-    public ImmutableList<InputSubtitleStream> SubtitleStreams => _subtitleStreams;
-    public ImmutableList<InputAttachmentStream> AttachmentStreams => _attachmentStreams;
-    public ImmutableList<InputDataStream> DataStreams => _dataStreams;
 
+    /// <summary>
+    /// The list of media streams.
+    /// </summary>
+    public ImmutableList<InputStream> Streams => _streams;
+
+    /// <summary>
+    /// The metadata related to the input source.
+    /// </summary>
     public ImmutableDictionary<string, string> Metadata => _metadata;
+
+    /// <summary>
+    /// The list of chapters.
+    /// </summary>
     public ImmutableList<Chapter> Chapters => _chapters;
+
+    /// <summary>
+    /// Position of the first frame, deduced from the stream values.
+    /// </summary>
+    public TimeSpan StartTime => TimeSpan.FromTicks(_context.Ptr.Ref.StartTime * (TimeSpan.TicksPerSecond /
+        LibAvUtil.AV_TIME_BASE));
+
+    /// <summary>
+    /// Seek input to the position.
+    /// </summary>
+    /// <param name="position"></param>
+    public void Seek(TimeSpan position) => Seek(position, TimeSpan.Zero);
+
+    /// <summary>
+    /// Seek input to the position with the accuracy.
+    /// The real position will be set withing interval [position - accuracy; position + accuracy].
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="accuracy"></param>
+    public void Seek(TimeSpan position, TimeSpan accuracy)
+    {
+        if (position < TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(position), "Position must be non-negative");
+
+        if (accuracy < TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(position), "Accuracy must be non-negative");
+
+        long ts = position.Ticks / (TimeSpan.TicksPerSecond / LibAvUtil.AV_TIME_BASE);
+        long acc = accuracy.Ticks / (TimeSpan.TicksPerSecond / LibAvUtil.AV_TIME_BASE);
+        LibAvFormat.avformat_seek_file(_context.Ptr, -1, Math.Max(ts - acc, 0), ts, ts + acc, AVIOSeekFlags.None)
+            .ThrowOnError("Error seeking");
+    }
 
     public void Dispose() => _context.Dispose();
 
@@ -73,6 +97,47 @@ public sealed class InputSource: IDisposable
 
     public static InputSource OpenFile(string filePath, InputFormat? forceFormat = null) =>
         new(OpenContextFromFile(filePath, forceFormat));
+
+    PushResult IInputSource.Push()
+    {
+        int error = LibAvFormat.av_read_frame(_context.Ptr, _packet.Ptr);
+        if (error < 0)
+        {
+            if (error == (int)AVError.AVERROR_EOF)
+            {
+                foreach (InputStream stream in _streams)
+                    stream.Completed();
+
+                return PushResult.EndOfData;
+            }
+
+            try
+            {
+                error.ThrowOnError("Failed to read packet");
+            }
+            catch (Exception exception)
+            {
+                foreach (InputStream stream in _streams)
+                    stream.Error(exception);
+            }
+
+            return PushResult.Error;
+        }
+
+        int streamIndex = _packet.Ptr.Ref.StreamIndex;
+        try
+        {
+            InputStream stream = _streams[streamIndex];
+            Packet packet = new(stream, _packet.Ptr);
+            stream.Next(packet);
+        }
+        finally
+        {
+            _packet.UnRef();
+        }
+
+        return PushResult.Success;
+    }
 
     private static InputSourceData OpenContextFromFile(string fileName,
         InputFormat? format)
@@ -113,11 +178,11 @@ public sealed class InputSource: IDisposable
         return new(context.MovePtr(), device);
     }
 
-    private static ImmutableList<InputStream> CreateStreams(ref AVFormatContext contextRef)
+    private static ImmutableList<InputStream> CreateStreams(InputSource source, ref AVFormatContext contextRef)
     {
         ImmutableList<InputStream>.Builder streams = ImmutableList.CreateBuilder<InputStream>();
         for (int i = 0, count = contextRef.StreamCount; i < count; i++)
-            streams.Add(InputStream.Create(contextRef.Streams[i]));
+            streams.Add(new InputStream(source, contextRef.Streams[i]));
 
         return streams.ToImmutable();
     }

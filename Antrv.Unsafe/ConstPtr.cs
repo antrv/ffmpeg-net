@@ -10,7 +10,7 @@ public readonly struct ConstPtr<T>: IEquatable<ConstPtr<T>>
     public ConstPtr(nint ptr) => _ptr = ptr;
     public ConstPtr(nuint ptr) => _ptr = (nint)ptr;
     public unsafe ConstPtr(T* ptr) => _ptr = (nint)ptr;
-    public unsafe ConstPtr(in T ptr) => _ptr = (nint)Unsafe.AsPointer(ref Unsafe.AsRef(ptr));
+    public unsafe ConstPtr(ref T ptr) => _ptr = (nint)Unsafe.AsPointer(ref Unsafe.AsRef(ptr));
     public unsafe ConstPtr(Ptr<T> ptr) => _ptr = (nint)ptr.Pointer;
 
     public static explicit operator ConstPtr<T>(nint ptr) => new(ptr);

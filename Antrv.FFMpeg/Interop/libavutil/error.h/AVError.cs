@@ -4,6 +4,8 @@ public enum AVError
 {
     OK = 0,
 
+    AVERROR_EAGAIN = -11,
+
     /// <summary>
     /// Bitstream filter not found
     /// </summary>

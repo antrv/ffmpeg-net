@@ -152,33 +152,34 @@ internal static class Information
             Console.WriteLine($" #{stream.Index} - {stream.MediaType} - {stream.Codec.Id} - {stream.TimeBase}");
             PrintMetadata(stream.Metadata, "      ");
 
-            switch (stream)
+            switch (stream.Parameters)
             {
-                case InputVideoStream videoStream:
-                    Console.WriteLine($"    - dimensions: {videoStream.Parameters.Width}x{videoStream.Parameters.Height}");
-                    Console.WriteLine($"    - pixel format: {videoStream.Parameters.PixelFormat}");
-                    Console.WriteLine($"    - bitrate: {videoStream.Parameters.BitRate}");
-                    Console.WriteLine($"    - profile: {videoStream.Parameters.Profile}");
-                    Console.WriteLine($"    - level: {videoStream.Parameters.Level}");
-                    Console.WriteLine($"    - field order: {videoStream.Parameters.FieldOrder}");
-                    Console.WriteLine($"    - codec tag: {videoStream.Parameters.CodecTag}");
-                    Console.WriteLine($"    - delay: {videoStream.Parameters.VideoDelay}");
-                    Console.WriteLine($"    - chroma location: {videoStream.Parameters.ChromaLocation}");
-                    Console.WriteLine($"    - color primaries: {videoStream.Parameters.ColorPrimaries}");
-                    Console.WriteLine($"    - color range: {videoStream.Parameters.ColorRange}");
-                    Console.WriteLine($"    - color space: {videoStream.Parameters.ColorSpace}");
-                    Console.WriteLine($"    - color transfer characteristic: {videoStream.Parameters.ColorTransferCharacteristic}");
+                case VideoParameters videoParameters:
+                    Console.WriteLine($"    - dimensions: {videoParameters.Width}x{videoParameters.Height}");
+                    Console.WriteLine($"    - pixel format: {videoParameters.PixelFormat}");
+                    Console.WriteLine($"    - bitrate: {videoParameters.BitRate}");
+                    Console.WriteLine($"    - profile: {videoParameters.Profile}");
+                    Console.WriteLine($"    - level: {videoParameters.Level}");
+                    Console.WriteLine($"    - field order: {videoParameters.FieldOrder}");
+                    Console.WriteLine($"    - codec tag: {videoParameters.CodecTag}");
+                    Console.WriteLine($"    - delay: {videoParameters.VideoDelay}");
+                    Console.WriteLine($"    - chroma location: {videoParameters.ChromaLocation}");
+                    Console.WriteLine($"    - color primaries: {videoParameters.ColorPrimaries}");
+                    Console.WriteLine($"    - color range: {videoParameters.ColorRange}");
+                    Console.WriteLine($"    - color space: {videoParameters.ColorSpace}");
+                    Console.WriteLine($"    - color transfer characteristic: {videoParameters.ColorTransferCharacteristic}");
                     break;
-                case InputAudioStream audioStream:
-                    Console.WriteLine($"    - sample format: {audioStream.Parameters.SampleFormat}");
-                    Console.WriteLine($"    - samplerate: {audioStream.Parameters.SampleRate}");
-                    Console.WriteLine($"    - bits per sample: {audioStream.Parameters.BitsPerSample}");
-                    Console.WriteLine($"    - channels: {audioStream.Parameters.Channels}");
-                    Console.WriteLine($"    - channel layout: {audioStream.Parameters.ChannelLayout}");
-                    Console.WriteLine($"    - bitrate: {audioStream.Parameters.BitRate}");
-                    Console.WriteLine($"    - profile: {audioStream.Parameters.Profile}");
-                    Console.WriteLine($"    - level: {audioStream.Parameters.Level}");
-                    Console.WriteLine($"    - codec tag: {audioStream.Parameters.CodecTag}");
+
+                case AudioParameters audioParameters:
+                    Console.WriteLine($"    - sample format: {audioParameters.SampleFormat}");
+                    Console.WriteLine($"    - samplerate: {audioParameters.SampleRate}");
+                    Console.WriteLine($"    - bits per sample: {audioParameters.BitsPerSample}");
+                    Console.WriteLine($"    - channels: {audioParameters.Channels}");
+                    Console.WriteLine($"    - channel layout: {audioParameters.ChannelLayout}");
+                    Console.WriteLine($"    - bitrate: {audioParameters.BitRate}");
+                    Console.WriteLine($"    - profile: {audioParameters.Profile}");
+                    Console.WriteLine($"    - level: {audioParameters.Level}");
+                    Console.WriteLine($"    - codec tag: {audioParameters.CodecTag}");
                     break;
             }
         }

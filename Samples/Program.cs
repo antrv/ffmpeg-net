@@ -14,5 +14,6 @@ else
     //PrintInputDevices();
     //PrintOutputDevices();
 
-    Devices.ShowCameraAndMicrophoneInfo();
+    //Devices.ShowCameraAndMicrophoneInfo();
+    Devices.TakeFrameFromCamera();
 }
