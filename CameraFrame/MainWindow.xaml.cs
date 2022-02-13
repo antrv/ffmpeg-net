@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Drawing;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using Antrv.FFMpeg;
 using Antrv.FFMpeg.Interop;
 using Antrv.FFMpeg.Model.IO;
 using Antrv.FFMpeg.Model.Processing;
-using SkiaSharp;
 
 namespace CameraFrame;
 /// <summary>
@@ -16,67 +16,75 @@ namespace CameraFrame;
 /// </summary>
 public partial class MainWindow: Window
 {
-    private CancellationTokenSource _source;
+    private readonly CancellationTokenSource _source;
+    private readonly Task _task;
 
     public MainWindow()
     {
         InitializeComponent();
 
         _source = new CancellationTokenSource();
-        ReadAsync(_source.Token);
-
-        //using InputSource source = Utils.GetCameraSource();
-        //using SKBitmap? bitmap = Utils.FrameFromSource(source);
-        //if (bitmap != null)
-        //{
-        //    WriteableBitmap writeableBitmap = Utils.CreateImage(bitmap.Width, bitmap.Height);
-        //    Utils.UpdateImage(writeableBitmap, bitmap);
-
-        //    image.Source = writeableBitmap;
-        //}
+        _task = Task.Run(() =>
+        {
+            try
+            {
+                ProcessVideo(_source.Token);
+            }
+            catch (Exception exception)
+            {
+                Dispatcher.Invoke(() => MessageBox.Show(exception.ToString()));
+            }
+        });
     }
 
-    protected override void OnClosed(EventArgs e)
+    protected override void OnClosing(CancelEventArgs e)
     {
         _source.Cancel();
-        base.OnClosed(e);
+        base.OnClosing(e);
     }
 
-    private async void ReadAsync(CancellationToken token)
+    private void ProcessVideo(CancellationToken token)
     {
-        //using InputSource source = InputSource.OpenFile(
-        //    @"D:\Video\Anime\Моя жена — президент студенческого совета! [2015-2016]\Okusama ga Seitokaichou! Plus [BDRip 1080p HEVC]\Okusama_ga_Seitokaichou_Plus_[01]_[BDRip_1080p_HEVC].mkv");
+        const string videoPath = @"video.mkv";
+        //using InputSource source = InputSource.OpenFile(videoPath);
         using InputSource source = Utils.GetCameraSource();
 
         InputStream videoStream = source.Streams.First(x => x.MediaType == AVMediaType.Video);
         VideoParameters parameters = (VideoParameters)videoStream.Parameters;
-        WriteableBitmap writeableBitmap = Utils.CreateImage(parameters.Width, parameters.Height);
-        image.Source = writeableBitmap;
+
+        WriteableBitmap writeableBitmap = null;
+
+        Dispatcher.Invoke(() =>
+        {
+            writeableBitmap = Utils.CreateImage(parameters.Width, parameters.Height);
+            image.Source = writeableBitmap;
+        });
+
+        using VideoFrameConverter converter = new(parameters, parameters.Width, parameters.Height,
+            AVPixelFormat.AV_PIX_FMT_BGRA, SwScaleFlags.SWS_BICUBIC);
 
         FrameObserver observer = new FrameObserver(frame =>
         {
-            SKBitmap bitmap = frame.ToBitmap();
-            Utils.UpdateImage(writeableBitmap, bitmap); // TODO: write to WriteableBitmap directly
+            Dispatcher.Invoke(() => converter.Convert(frame, writeableBitmap));
         });
 
-        using Decoder decoder = new Decoder(videoStream);
-        ((IRawVideoStream)decoder.RawStream).Subscribe(observer);
+        using StreamDecoder decoder = new StreamDecoder(videoStream);
+        decoder.Subscribe(observer);
 
         while (!token.IsCancellationRequested && !observer.Stop)
         {
             ((IInputSource)source).Push();
-            await Task.Delay(5);
         }
     }
 
-    private sealed class FrameObserver: IObserver<VideoFrame>
+    private sealed class FrameObserver: IObserver<Frame>
     {
-        private readonly Action<VideoFrame> _action;
+        private readonly Action<Frame> _action;
         private bool _stop;
-        public FrameObserver(Action<VideoFrame> action) => _action = action;
+        public FrameObserver(Action<Frame> action) => _action = action;
         public bool Stop => _stop;
         public void OnCompleted() => _stop = true;
         public void OnError(Exception error) => _stop = true;
-        public void OnNext(VideoFrame value) => _action(value);
+        public void OnNext(Frame value) => _action(value);
     }
 }

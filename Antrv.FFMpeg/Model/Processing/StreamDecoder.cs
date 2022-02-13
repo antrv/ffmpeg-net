@@ -1,38 +1,44 @@
 ﻿using Antrv.FFMpeg.Interop;
 using Antrv.FFMpeg.Model.Guards;
+using Antrv.FFMpeg.Model.IO;
 
 namespace Antrv.FFMpeg.Model.Processing;
 
-public sealed class Decoder: IObserver<Packet>, IDisposable
+public sealed class StreamDecoder: IRawStream, IObserver<Packet>, IDisposable
 {
-    private readonly DecodedStream _decodedStream;
+    private readonly ObserverManager<Frame> _manager;
     private readonly CodecContextGuard _context;
     private readonly FrameGuard _frame;
     private readonly IDisposable _subscription;
 
-    public Decoder(IEncodedStream sourceStream)
+    public StreamDecoder(IEncodedStream inputStream)
     {
-        SourceStream = sourceStream;
-        _context = CreateDecoder(sourceStream);
+        _manager = new();
+
+        InputStream = inputStream;
+        _context = CreateDecoder(inputStream);
         _frame = new();
 
-        _decodedStream = DecodedStreamFactory.CreateDecodedStream(sourceStream);
-
         // subscribe
-        _subscription = sourceStream.Subscribe(this);
+        _subscription = inputStream.Subscribe(this);
     }
 
-    public IEncodedStream SourceStream { get; }
-    public IRawStream RawStream => _decodedStream;
+    public IEncodedStream InputStream { get; }
+    public AVMediaType MediaType => InputStream.MediaType;
+    public AVRational TimeBase => InputStream.TimeBase;
+    public StreamParameters Parameters => InputStream.Parameters;
+
+    public IDisposable Subscribe(IObserver<Frame> observer) => _manager.Subscribe(observer);
 
     public void Dispose()
     {
+        _manager.Clear();
         _subscription.Dispose();
         _frame.Dispose();
     }
 
-    void IObserver<Packet>.OnCompleted() => _decodedStream.OnCompleted();
-    void IObserver<Packet>.OnError(Exception error) => _decodedStream.OnError(error);
+    void IObserver<Packet>.OnCompleted() => _manager.Completed();
+    void IObserver<Packet>.OnError(Exception error) => _manager.Error(error);
     void IObserver<Packet>.OnNext(Packet value)
     {
         try
@@ -41,7 +47,7 @@ public sealed class Decoder: IObserver<Packet>, IDisposable
         }
         catch (Exception exception)
         {
-            _decodedStream.OnError(exception);
+            _manager.Error(exception);
         }
     }
 
@@ -59,8 +65,14 @@ public sealed class Decoder: IObserver<Packet>, IDisposable
                 error.ThrowOnError("Failed to decode packet");
             }
 
-            _decodedStream.OnNext(_frame.Ptr);
-            _frame.UnRef();
+            try
+            {
+                _manager.Next(new Frame(this, _frame.Ptr));
+            }
+            finally
+            {
+                _frame.UnRef();
+            }
         }
     }
 

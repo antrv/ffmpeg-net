@@ -3,7 +3,6 @@ using Antrv.FFMpeg.Interop;
 using Antrv.FFMpeg.Model;
 using Antrv.FFMpeg.Model.Devices;
 using Antrv.FFMpeg.Model.IO;
-using Antrv.FFMpeg.Model.Processing;
 
 namespace Samples;
 
@@ -40,49 +39,5 @@ internal static class Devices
         using InputSource deviceSource = InputSource.OpenDevice(device, source, builder.ToImmutable());
         Console.WriteLine(source);
         Information.PrintInputSourceInfo(deviceSource);
-    }
-
-    internal static void TakeFrameFromCamera()
-    {
-        InputDevice device = Global.InputDevices["dshow"]; // DirectShow device, Windows only
-
-        string videoSource = device.Sources.First(p => p.MediaTypes.Contains(AVMediaType.Video)).Name;
-
-        ImmutableDictionary<string, string>.Builder builder = ImmutableDictionary.CreateBuilder<string, string>();
-        // TODO: get camera resolutions from DirectShow
-        builder.Add("video_size", "1920x1080");
-
-        using InputSource deviceSource = InputSource.OpenDevice(device, $"video={videoSource}", builder.ToImmutable());
-        InputStream videoStream = deviceSource.Streams[0];
-
-        using Decoder decoder = new(videoStream);
-        FrameObserver frameObserver = new();
-        ((IRawVideoStream)decoder.RawStream).Subscribe(frameObserver);
-        
-        while (!frameObserver.Stop)
-            ((IInputSource)deviceSource).Push();
-    }
-
-    private sealed class FrameObserver: IObserver<VideoFrame>
-    {
-        private bool _stop;
-
-        public bool Stop => _stop;
-
-        public void OnCompleted()
-        {
-            _stop = true;
-        }
-
-        public void OnError(Exception error)
-        {
-            _stop = true;
-        }
-
-        public void OnNext(VideoFrame value)
-        {
-            _stop = true;
-            Console.WriteLine("Received frame from camera");
-        }
     }
 }

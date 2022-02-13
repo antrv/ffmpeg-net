@@ -18,6 +18,8 @@ internal sealed class ObserverManager<T>: IObservable<T>
         _onUnsubscribed = onUnsubscribed;
     }
 
+    public void Clear() => _stack.Clear();
+
     public IDisposable Subscribe(IObserver<T> observer)
     {
         Deleter deleter = new(this, observer);

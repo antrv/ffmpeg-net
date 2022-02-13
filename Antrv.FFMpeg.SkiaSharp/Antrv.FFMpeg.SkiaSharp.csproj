@@ -4,16 +4,15 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RootNamespace>Antrv.FFMpeg</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Antrv.Unsafe\Antrv.Unsafe.csproj" />
+    <PackageReference Include="SkiaSharp" Version="2.80.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Interop\libavcodec\codec_desc.h\" />
-    <Folder Include="Interop\libavcodec\packet.h\" />
-    <Folder Include="Interop\libswscale\swscale.h\" />
+    <ProjectReference Include="..\Antrv.FFMpeg\Antrv.FFMpeg.csproj" />
   </ItemGroup>
 
 </Project>

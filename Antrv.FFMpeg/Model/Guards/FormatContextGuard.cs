@@ -1,5 +1,4 @@
 ﻿using Antrv.FFMpeg.Interop;
-using SkiaSharp;
 
 namespace Antrv.FFMpeg.Model.Guards;
 
