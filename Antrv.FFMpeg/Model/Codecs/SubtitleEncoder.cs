@@ -4,8 +4,11 @@ namespace Antrv.FFMpeg.Model.Codecs;
 
 public sealed class SubtitleEncoder: Encoder
 {
-    internal SubtitleEncoder(ConstPtr<AVCodec> ptr)
+    internal SubtitleEncoder(SubtitleCodec codec, ConstPtr<AVCodec> ptr)
         : base(ptr)
     {
+        Codec = codec;
     }
+
+    public override SubtitleCodec Codec { get; }
 }

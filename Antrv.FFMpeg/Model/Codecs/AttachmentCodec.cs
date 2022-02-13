@@ -7,12 +7,11 @@ namespace Antrv.FFMpeg.Model.Codecs;
 /// </summary>
 public sealed class AttachmentCodec: Codec
 {
-    internal AttachmentCodec(ConstPtr<AVCodecDescriptor> ptr, IReadOnlyList<AttachmentDecoder> decoders,
-        IReadOnlyList<AttachmentEncoder> encoders)
+    internal AttachmentCodec(ConstPtr<AVCodecDescriptor> ptr, ConstPtr<AVCodec>[] coders)
         : base(ptr)
     {
-        Decoders = decoders;
-        Encoders = encoders;
+        Decoders = GetCoderList(coders, false, c => new AttachmentDecoder(this, c));
+        Encoders = GetCoderList(coders, true, c => new AttachmentEncoder(this, c));
     }
 
     /// <inheritdoc />

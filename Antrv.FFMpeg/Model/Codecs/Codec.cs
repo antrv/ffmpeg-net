@@ -52,4 +52,8 @@ public abstract class Codec
     public abstract IReadOnlyList<Encoder> Encoders { get; }
 
     public override string ToString() => $"{MediaType} - {ShortName} - {Name}";
+
+    private protected static ImmutableList<T> GetCoderList<T>(ConstPtr<AVCodec>[] coders, bool encoders,
+        Func<ConstPtr<AVCodec>, T> func) => coders.Where(c => (LibAvCodec.av_codec_is_encoder(c) != 0) == encoders)
+        .Select(func).ToImmutableList();
 }

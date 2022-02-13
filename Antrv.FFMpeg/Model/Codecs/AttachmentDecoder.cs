@@ -4,8 +4,11 @@ namespace Antrv.FFMpeg.Model.Codecs;
 
 public sealed class AttachmentDecoder: Decoder
 {
-    internal AttachmentDecoder(ConstPtr<AVCodec> ptr)
+    internal AttachmentDecoder(AttachmentCodec codec, ConstPtr<AVCodec> ptr)
         : base(ptr)
     {
+        Codec = codec;
     }
+
+    public override AttachmentCodec Codec { get; }
 }

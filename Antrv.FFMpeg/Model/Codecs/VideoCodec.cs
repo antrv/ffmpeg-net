@@ -1,4 +1,5 @@
-﻿using Antrv.FFMpeg.Interop;
+﻿using System.Collections.Immutable;
+using Antrv.FFMpeg.Interop;
 
 namespace Antrv.FFMpeg.Model.Codecs;
 
@@ -7,12 +8,11 @@ namespace Antrv.FFMpeg.Model.Codecs;
 /// </summary>
 public sealed class VideoCodec: Codec
 {
-    internal VideoCodec(ConstPtr<AVCodecDescriptor> ptr, IReadOnlyList<VideoDecoder> decoders,
-        IReadOnlyList<VideoEncoder> encoders)
+    internal VideoCodec(ConstPtr<AVCodecDescriptor> ptr, ConstPtr<AVCodec>[] coders)
         : base(ptr)
     {
-        Decoders = decoders;
-        Encoders = encoders;
+        Decoders = GetCoderList(coders, false, c => new VideoDecoder(this, c));
+        Encoders = GetCoderList(coders, true, c => new VideoEncoder(this, c));
     }
 
     /// <inheritdoc />

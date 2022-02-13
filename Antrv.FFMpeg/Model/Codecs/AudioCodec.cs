@@ -7,12 +7,11 @@ namespace Antrv.FFMpeg.Model.Codecs;
 /// </summary>
 public sealed class AudioCodec: Codec
 {
-    internal AudioCodec(ConstPtr<AVCodecDescriptor> ptr, IReadOnlyList<AudioDecoder> decoders,
-        IReadOnlyList<AudioEncoder> encoders)
+    internal AudioCodec(ConstPtr<AVCodecDescriptor> ptr, ConstPtr<AVCodec>[] coders)
         : base(ptr)
     {
-        Decoders = decoders;
-        Encoders = encoders;
+        Decoders = GetCoderList(coders, false, c => new AudioDecoder(this, c));
+        Encoders = GetCoderList(coders, true, c => new AudioEncoder(this, c));
     }
 
     /// <inheritdoc />

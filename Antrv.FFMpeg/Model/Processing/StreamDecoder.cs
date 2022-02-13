@@ -1,4 +1,5 @@
 ﻿using Antrv.FFMpeg.Interop;
+using Antrv.FFMpeg.Model.Codecs;
 using Antrv.FFMpeg.Model.Guards;
 using Antrv.FFMpeg.Model.IO;
 
@@ -11,22 +12,24 @@ public sealed class StreamDecoder: IRawStream, IObserver<Packet>, IDisposable
     private readonly FrameGuard _frame;
     private readonly IDisposable _subscription;
 
-    public StreamDecoder(IEncodedStream inputStream)
+    public StreamDecoder(IEncodedStream sourceStream, Decoder? decoder = null)
     {
-        _manager = new();
+        Decoder = GetDecoder(sourceStream, decoder);
+        SourceStream = sourceStream;
 
-        InputStream = inputStream;
-        _context = CreateDecoder(inputStream);
+        _context = CreateDecoderContext(sourceStream, Decoder);
+        _manager = new();
         _frame = new();
 
         // subscribe
-        _subscription = inputStream.Subscribe(this);
+        _subscription = sourceStream.Subscribe(this);
     }
 
-    public IEncodedStream InputStream { get; }
-    public AVMediaType MediaType => InputStream.MediaType;
-    public AVRational TimeBase => InputStream.TimeBase;
-    public StreamParameters Parameters => InputStream.Parameters;
+    public IEncodedStream SourceStream { get; }
+    public Decoder Decoder { get; }
+    public AVMediaType MediaType => SourceStream.MediaType;
+    public AVRational TimeBase => SourceStream.TimeBase;
+    public StreamParameters Parameters => SourceStream.Parameters;
 
     public IDisposable Subscribe(IObserver<Frame> observer) => _manager.Subscribe(observer);
 
@@ -76,14 +79,27 @@ public sealed class StreamDecoder: IRawStream, IObserver<Packet>, IDisposable
         }
     }
 
-    private static CodecContextGuard CreateDecoder(IEncodedStream stream)
+    private static Decoder GetDecoder(IEncodedStream stream, Decoder? decoder)
     {
-        ConstPtr<AVCodec> decoder = LibAvCodec.avcodec_find_decoder(stream.Codec.Id);
-        if (!decoder)
-            throw new InvalidOperationException($"No decoder for codec {stream.Codec}");
+        AVCodecID codecId = stream.Codec.Id;
+        if (decoder is null)
+        {
+            ConstPtr<AVCodec> decoderPtr = LibAvCodec.avcodec_find_decoder(codecId);
+            if (!decoderPtr)
+                throw new InvalidOperationException($"No decoder for codec {stream.Codec}");
 
-        // TODO: ability to choose decoder (i.e. hardware decoder)
-        using CodecContextGuard contextGuard = new(decoder);
+            return stream.Codec.Decoders.First(x => x.CodecPtr == decoderPtr);
+        }
+
+        if (decoder.CodecId != codecId)
+            throw new ArgumentException("Decoder codec and stream codec are not the same codec", nameof(decoder));
+
+        return decoder;
+    }
+
+    private static CodecContextGuard CreateDecoderContext(IEncodedStream stream, Decoder decoder)
+    {
+        using CodecContextGuard contextGuard = new(decoder.CodecPtr);
         ref AVCodecContext context = ref contextGuard.Ptr.Ref;
 
         LibAvCodec.avcodec_parameters_to_context(contextGuard.Ptr, stream.CodecParameters.Ptr)
@@ -92,7 +108,7 @@ public sealed class StreamDecoder: IRawStream, IObserver<Packet>, IDisposable
         context.TimeBase = stream.TimeBase;
 
         using DictionaryGuard dictionaryWrapper = new();
-        LibAvCodec.avcodec_open2(contextGuard.Ptr, decoder, ref dictionaryWrapper.Ptr)
+        LibAvCodec.avcodec_open2(contextGuard.Ptr, decoder.CodecPtr, ref dictionaryWrapper.Ptr)
             .ThrowOnError("Failed to open decoder");
 
         return contextGuard.MovePtr();

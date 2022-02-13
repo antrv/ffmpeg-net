@@ -13,7 +13,13 @@ public sealed class CodecList: IReadOnlyList<Codec>
 
     internal CodecList()
     {
-        (Codecs, VideoCodecs, AudioCodecs, SubtitleCodecs, AttachmentCodecs, DataCodecs) = BuildCodecLists();
+        Codecs = GetCodecs();
+        VideoCodecs = Codecs.OfType<VideoCodec>().ToImmutableList();
+        AudioCodecs = Codecs.OfType<AudioCodec>().ToImmutableList();
+        SubtitleCodecs = Codecs.OfType<SubtitleCodec>().ToImmutableList();
+        AttachmentCodecs = Codecs.OfType<AttachmentCodec>().ToImmutableList();
+        DataCodecs = Codecs.OfType<DataCodec>().ToImmutableList();
+
         _dictionary = Codecs.ToImmutableDictionary(c => c.Id);
         UnknownCodec = new UnknownCodec();
     }
@@ -66,104 +72,28 @@ public sealed class CodecList: IReadOnlyList<Codec>
     /// </summary>
     public UnknownCodec UnknownCodec { get; }
 
-    private static (ImmutableList<Codec>, ImmutableList<VideoCodec>, ImmutableList<AudioCodec>,
-        ImmutableList<SubtitleCodec>, ImmutableList<AttachmentCodec>, ImmutableList<DataCodec>) BuildCodecLists()
+    private static ImmutableList<Codec> GetCodecs()
     {
-        List<VideoDecoder> videoDecoders = new();
-        List<VideoEncoder> videoEncoders = new();
-        List<AudioDecoder> audioDecoders = new();
-        List<AudioEncoder> audioEncoders = new();
-        List<SubtitleDecoder> subtitleDecoders = new();
-        List<SubtitleEncoder> subtitleEncoders = new();
-        List<AttachmentDecoder> attachmentDecoders = new();
-        List<AttachmentEncoder> attachmentEncoders = new();
-        List<DataDecoder> dataDecoders = new();
-        List<DataEncoder> dataEncoders = new();
+        Dictionary<AVCodecID, ConstPtr<AVCodec>[]> coders = Utils.EnumerateCodecs().GroupBy(p => p.Ref.Id)
+            .ToDictionary(g => g.Key, g => g.ToArray());
 
-        foreach (ConstPtr<AVCodec> ptr in Utils.EnumerateCodecs())
+        return Utils.EnumerateCodecDescriptors().Select(p => CreateCodec(p, coders)).ToImmutableList();
+    }
+
+    private static Codec CreateCodec(ConstPtr<AVCodecDescriptor> ptr,
+        Dictionary<AVCodecID, ConstPtr<AVCodec>[]> coders)
+    {
+        if (!coders.TryGetValue(ptr.Ref.Id, out ConstPtr<AVCodec>[]? coderArray))
+            coderArray = Array.Empty<ConstPtr<AVCodec>>();
+
+        return ptr.Ref.Type switch
         {
-            bool isEncoder = LibAvCodec.av_codec_is_encoder(ptr) != 0;
-            switch (ptr.Ref.Type)
-            {
-                case AVMediaType.Video:
-                    if (isEncoder)
-                        videoEncoders.Add(new VideoEncoder(ptr));
-                    else
-                        videoDecoders.Add(new VideoDecoder(ptr));
-                    break;
-
-                case AVMediaType.Audio:
-                    if (isEncoder)
-                        audioEncoders.Add(new AudioEncoder(ptr));
-                    else
-                        audioDecoders.Add(new AudioDecoder(ptr));
-                    break;
-
-                case AVMediaType.Subtitle:
-                    if (isEncoder)
-                        subtitleEncoders.Add(new SubtitleEncoder(ptr));
-                    else
-                        subtitleDecoders.Add(new SubtitleDecoder(ptr));
-                    break;
-
-                case AVMediaType.Attachment:
-                    if (isEncoder)
-                        attachmentEncoders.Add(new AttachmentEncoder(ptr));
-                    else
-                        attachmentDecoders.Add(new AttachmentDecoder(ptr));
-                    break;
-
-                case AVMediaType.Data:
-                    if (isEncoder)
-                        dataEncoders.Add(new DataEncoder(ptr));
-                    else
-                        dataDecoders.Add(new DataDecoder(ptr));
-                    break;
-            }
-        }
-
-        ImmutableList<Codec>.Builder codecs = ImmutableList.CreateBuilder<Codec>();
-        ImmutableList<VideoCodec>.Builder videoCodecs = ImmutableList.CreateBuilder<VideoCodec>();
-        ImmutableList<AudioCodec>.Builder audioCodecs = ImmutableList.CreateBuilder<AudioCodec>();
-        ImmutableList<SubtitleCodec>.Builder subtitleCodecs = ImmutableList.CreateBuilder<SubtitleCodec>();
-        ImmutableList<AttachmentCodec>.Builder attachmentCodecs = ImmutableList.CreateBuilder<AttachmentCodec>();
-        ImmutableList<DataCodec>.Builder dataCodecs = ImmutableList.CreateBuilder<DataCodec>();
-        foreach (ConstPtr<AVCodecDescriptor> ptr in Utils.EnumerateCodecDescriptors())
-        {
-            switch (ptr.Ref.Type)
-            {
-                case AVMediaType.Video:
-                    codecs.Add(new VideoCodec(ptr,
-                        videoDecoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList(),
-                        videoEncoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList()));
-                    break;
-
-                case AVMediaType.Audio:
-                    codecs.Add(new AudioCodec(ptr,
-                        audioDecoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList(),
-                        audioEncoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList()));
-                    break;
-
-                case AVMediaType.Subtitle:
-                    codecs.Add(new SubtitleCodec(ptr,
-                        subtitleDecoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList(),
-                        subtitleEncoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList()));
-                    break;
-
-                case AVMediaType.Attachment:
-                    codecs.Add(new AttachmentCodec(ptr,
-                        attachmentDecoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList(),
-                        attachmentEncoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList()));
-                    break;
-
-                case AVMediaType.Data:
-                    codecs.Add(new DataCodec(ptr, dataDecoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList(),
-                        dataEncoders.Where(x => x.CodecId == ptr.Ref.Id).ToImmutableList()));
-                    break;
-            }
-        }
-
-        return (codecs.ToImmutable(), videoCodecs.ToImmutable(), audioCodecs.ToImmutable(),
-            subtitleCodecs.ToImmutable(), attachmentCodecs.ToImmutable(), dataCodecs.ToImmutable());
+            AVMediaType.Video => new VideoCodec(ptr, coderArray),
+            AVMediaType.Audio => new AudioCodec(ptr, coderArray),
+            AVMediaType.Subtitle => new SubtitleCodec(ptr, coderArray),
+            AVMediaType.Attachment => new AttachmentCodec(ptr, coderArray),
+            AVMediaType.Data => new DataCodec(ptr, coderArray),
+            _ => throw new InvalidOperationException("Invalid codec type")
+        };
     }
 }

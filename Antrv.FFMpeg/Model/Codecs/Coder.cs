@@ -19,6 +19,8 @@ public abstract class Coder
         Profiles = ptr.Ref.Profiles.CreateProfileList();
     }
 
+    public abstract Codec Codec { get; }
+
     public AVCodecID CodecId { get; }
 
     public AVMediaType MediaType { get; }

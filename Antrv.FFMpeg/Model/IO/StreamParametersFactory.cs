@@ -4,12 +4,12 @@ namespace Antrv.FFMpeg.Model.IO;
 
 internal static class StreamParametersFactory
 {
-    internal static StreamParameters CreateStreamParameters(in AVCodecParameters pars)
+    internal static StreamParameters CreateStreamParameters(in AVStream stream, in AVCodecParameters pars)
     {
         switch (pars.CodecType)
         {
             case AVMediaType.Video:
-                return CreateVideoParameters(pars);
+                return CreateVideoParameters(stream, pars);
 
             case AVMediaType.Audio:
                 return CreateAudioParameters(pars);
@@ -28,17 +28,19 @@ internal static class StreamParametersFactory
         }
     }
 
-    private static VideoParameters CreateVideoParameters(in AVCodecParameters pars) =>
+    private static VideoParameters CreateVideoParameters(in AVStream stream, in AVCodecParameters pars) =>
         new()
         {
             MediaType = AVMediaType.Video,
-            Width = pars.Width,
-            Height = pars.Height,
             BitRate = pars.BitRate,
             Profile = pars.Profile,
             Level = pars.Level,
-            FieldOrder = pars.FieldOrder,
             CodecTag = pars.CodecTag,
+            Width = pars.Width,
+            Height = pars.Height,
+            FrameRate = stream.AvgFrameRate,
+            SampleAspectRatio = pars.SampleAspectRatio,
+            FieldOrder = pars.FieldOrder,
             ChromaLocation = pars.ChromaLocation,
             PixelFormat = (AVPixelFormat)pars.Format,
             ColorPrimaries = pars.ColorPrimaries,

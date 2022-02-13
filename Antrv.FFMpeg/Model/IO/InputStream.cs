@@ -18,7 +18,7 @@ public sealed class InputStream: IEncodedStream
         Source = source;
 
         ref AVCodecParameters codecParams = ref ptr.Ref.CodecParameters.Ref;
-        Parameters = StreamParametersFactory.CreateStreamParameters(codecParams);
+        Parameters = StreamParametersFactory.CreateStreamParameters(ptr.Ref, codecParams);
         _codecParameters = new(ptr.Ref.CodecParameters);
 
         Index = ptr.Ref.Index;

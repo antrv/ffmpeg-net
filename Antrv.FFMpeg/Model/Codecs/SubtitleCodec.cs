@@ -7,12 +7,11 @@ namespace Antrv.FFMpeg.Model.Codecs;
 /// </summary>
 public sealed class SubtitleCodec: Codec
 {
-    internal SubtitleCodec(ConstPtr<AVCodecDescriptor> ptr, IReadOnlyList<SubtitleDecoder> decoders,
-        IReadOnlyList<SubtitleEncoder> encoders)
+    internal SubtitleCodec(ConstPtr<AVCodecDescriptor> ptr, ConstPtr<AVCodec>[] coders)
         : base(ptr)
     {
-        Decoders = decoders;
-        Encoders = encoders;
+        Decoders = GetCoderList(coders, false, c => new SubtitleDecoder(this, c));
+        Encoders = GetCoderList(coders, true, c => new SubtitleEncoder(this, c));
     }
 
     /// <inheritdoc />

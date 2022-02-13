@@ -6,6 +6,8 @@ public sealed class VideoParameters: StreamParameters
 {
     public int Width { get; init; }
     public int Height { get; init; }
+    public AVRational FrameRate { get; init; }
+    public AVRational SampleAspectRatio { get; init; }
     public AVPixelFormat PixelFormat { get; init; }
     public AVChromaLocation ChromaLocation { get; init; }
     public AVColorPrimaries ColorPrimaries { get; init; }
